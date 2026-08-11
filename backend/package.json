@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\" && prisma generate && tsc",
+    "vercel-build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "migrate": "ts-node src/db/migrate.ts",
     "seed": "ts-node src/db/seed.ts"
