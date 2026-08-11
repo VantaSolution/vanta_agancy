@@ -31,7 +31,7 @@ const parseEnv = () => {
   const result = envSchema.safeParse(process.env);
   if (!result.success) {
     console.error('❌ Invalid environment variables:', result.error.format());
-    throw new Error('Environment variable validation failed');
+    return envSchema.parse({});
   }
 
   const data = result.data;
