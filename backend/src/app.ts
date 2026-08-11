@@ -20,6 +20,9 @@ import dashboardRoutes from './routes/dashboard.routes';
 
 const app: Application = express();
 
+// Trust reverse proxy for Vercel deployment IP rate limiting
+app.set('trust proxy', 1);
+
 // Security
 app.use(
   helmet({
@@ -35,7 +38,7 @@ app.use(
       if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
-      return callback(new Error('CORS not allowed for this origin'));
+      return callback(null, false);
     },
     credentials: true,
   })
