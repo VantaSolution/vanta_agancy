@@ -79,15 +79,15 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ success: true, message: 'VANTA API is healthy', timestamp: new Date().toISOString() });
 });
 
-// API Routes
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/projects', projectsRoutes);
-app.use('/api/services', servicesRoutes);
-app.use('/api/messages', contactLimiter, messagesRoutes);
-app.use('/api/content', contentRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/media', mediaRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+// API Routes (Support both /api/* and /*)
+app.use(['/api/auth', '/auth'], authLimiter, authRoutes);
+app.use(['/api/projects', '/projects'], projectsRoutes);
+app.use(['/api/services', '/services'], servicesRoutes);
+app.use(['/api/messages', '/messages'], contactLimiter, messagesRoutes);
+app.use(['/api/content', '/content'], contentRoutes);
+app.use(['/api/settings', '/settings'], settingsRoutes);
+app.use(['/api/media', '/media'], mediaRoutes);
+app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
 
 // Global error handler
 app.use(errorHandler);
