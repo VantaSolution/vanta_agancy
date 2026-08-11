@@ -14,8 +14,9 @@ router.get('/', async (req: Request, res: Response) => {
       : 'SELECT * FROM projects ORDER BY display_order ASC';
     const result = await query(sql);
     res.json({ success: true, data: result.rows.map(mapProject) });
-  } catch (error) {
-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch projects' } });
+  } catch (error: any) {
+    console.error('[GET /api/projects] Error:', error?.message || error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch projects', details: error?.message } });
   }
 });
 
@@ -32,8 +33,9 @@ router.put('/reorder', authenticateJWT, async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, message: 'Projects reordered successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reorder projects' } });
+  } catch (error: any) {
+    console.error('[PUT /api/projects/reorder] Error:', error?.message || error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to reorder projects', details: error?.message } });
   }
 });
 
@@ -43,8 +45,9 @@ router.get('/:id', async (req: Request, res: Response) => {
     const result = await query('SELECT * FROM projects WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } });
     res.json({ success: true, data: mapProject(result.rows[0]) });
-  } catch (error) {
-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch project' } });
+  } catch (error: any) {
+    console.error('[GET /api/projects/:id] Error:', error?.message || error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch project', details: error?.message } });
   }
 });
 
@@ -53,7 +56,13 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const b = req.body;
     const name = b.name;
-    const slug = b.slug || (name ? name.toLowerCase().replace(/\s+/g, '-') : '');
+
+    // Validate required fields
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Project name is required' } });
+    }
+
+    const slug = b.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const short_description = b.shortDescription || b.short_description || '';
     const full_description = b.fullDescription || b.full_description || '';
     const category = b.category || '';
@@ -68,14 +77,25 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
     const display_order = b.displayOrder !== undefined ? b.displayOrder : (b.display_order || 0);
     const project_date = b.projectDate || b.project_date || new Date().toISOString().split('T')[0];
 
+    // Check for duplicate slug
+    const existing = await query('SELECT id FROM projects WHERE slug = $1', [slug]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ success: false, error: { code: 'DUPLICATE_SLUG', message: `A project with slug "${slug}" already exists. Please use a different name.` } });
+    }
+
     const result = await query(
       `INSERT INTO projects (name, slug, short_description, full_description, category, client_name, project_image, gallery_images, technologies, project_url, case_study_url, is_featured, is_published, display_order, project_date)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
       [name, slug, short_description, full_description, category, client_name, project_image, gallery_images, technologies, project_url, case_study_url, is_featured, is_published, display_order, project_date]
     );
     res.status(201).json({ success: true, data: mapProject(result.rows[0]) });
-  } catch (error) {
-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create project' } });
+  } catch (error: any) {
+    console.error('[POST /api/projects] Error creating project:', error?.message || error, error?.stack);
+    // Handle PostgreSQL unique constraint violation
+    if (error?.code === '23505') {
+      return res.status(409).json({ success: false, error: { code: 'DUPLICATE_ENTRY', message: 'A project with this slug already exists.' } });
+    }
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create project', details: error?.message } });
   }
 });
 
@@ -143,8 +163,9 @@ router.put('/:id', authenticateJWT, async (req: Request, res: Response) => {
 
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } });
     res.json({ success: true, data: mapProject(result.rows[0]) });
-  } catch (error) {
-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update project' } });
+  } catch (error: any) {
+    console.error('[PUT /api/projects/:id] Error:', error?.message || error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update project', details: error?.message } });
   }
 });
 
@@ -154,8 +175,9 @@ router.delete('/:id', authenticateJWT, async (req: Request, res: Response) => {
     const result = await query('DELETE FROM projects WHERE id = $1 RETURNING id', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Project not found' } });
     res.json({ success: true, data: { id: req.params.id } });
-  } catch (error) {
-    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete project' } });
+  } catch (error: any) {
+    console.error('[DELETE /api/projects/:id] Error:', error?.message || error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete project', details: error?.message } });
   }
 });
 
