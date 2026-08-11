@@ -6,7 +6,6 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-// Configure multer for local file storage
 const uploadDir = path.join(__dirname, '../../uploads');
 try {
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -14,13 +13,16 @@ try {
   // Ignore directory creation in read-only serverless environment
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
-});
+// Memory storage for serverless environments (Vercel), disk storage for local dev
+const storage = process.env.VERCEL || process.env.NODE_ENV === 'production'
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, uploadDir),
+      filename: (_req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
+      },
+    });
 
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedMimeTypes = [
@@ -53,21 +55,31 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response) => {
 });
 
 // POST /api/media — Protected
-router.post('/', authenticateJWT, (req: Request, res: Response, next) => {
+router.post('/', authenticateJWT, (req: Request, res: Response) => {
   upload.single('file')(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ success: false, error: { code: 'FILE_UPLOAD_ERROR', message: err.message } });
     }
     try {
       if (!req.file) return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'No file uploaded' } });
-      const { filename, originalname, mimetype, size } = req.file;
-      const url = `/uploads/${filename}`;
+      
+      const { originalname, mimetype, size } = req.file;
+      const filename = req.file.filename || `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(originalname) || '.png'}`;
+      
+      // If buffer is present (Serverless Memory Storage), store as Base64 Data URI
+      let url = `/uploads/${filename}`;
+      if (req.file.buffer) {
+        const base64 = req.file.buffer.toString('base64');
+        url = `data:${mimetype};base64,${base64}`;
+      }
+
       const result = await query(
         'INSERT INTO media (filename, original_name, mime_type, size, url) VALUES ($1,$2,$3,$4,$5) RETURNING *',
         [filename, originalname, mimetype, size, url]
       );
       res.status(201).json({ success: true, data: mapMedia(result.rows[0]) });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Media upload database error:', error);
       res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to upload media' } });
     }
   });
@@ -78,8 +90,16 @@ router.delete('/:id', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const result = await query('SELECT * FROM media WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Media not found' } });
-    const filePath = path.join(uploadDir, result.rows[0].filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    
+    if (result.rows[0].filename) {
+      const filePath = path.join(uploadDir, result.rows[0].filename);
+      try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } catch (_e) {
+        // Ignore file unlink error on read-only serverless environment
+      }
+    }
+
     await query('DELETE FROM media WHERE id = $1', [req.params.id]);
     res.json({ success: true, data: { id: req.params.id } });
   } catch (error) {
