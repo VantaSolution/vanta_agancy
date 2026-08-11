@@ -4,25 +4,9 @@ import { authenticateJWT } from '../middlewares/auth.middleware';
 import { mapMedia } from '../utils/transformers';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
 
-const uploadDir = path.join(__dirname, '../../uploads');
-try {
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-} catch (_e) {
-  // Ignore directory creation in read-only serverless environment
-}
-
-// Memory storage for serverless environments (Vercel), disk storage for local dev
-const storage = process.env.VERCEL || process.env.NODE_ENV === 'production'
-  ? multer.memoryStorage()
-  : multer.diskStorage({
-      destination: (_req, _file, cb) => cb(null, uploadDir),
-      filename: (_req, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
-      },
-    });
+// Memory storage for 100% serverless safety (Vercel) & fast DB storage
+const storage = multer.memoryStorage();
 
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedMimeTypes = [
@@ -63,15 +47,12 @@ router.post('/', authenticateJWT, (req: Request, res: Response) => {
     try {
       if (!req.file) return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'No file uploaded' } });
       
-      const { originalname, mimetype, size } = req.file;
-      const filename = req.file.filename || `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(originalname) || '.png'}`;
+      const { originalname, mimetype, size, buffer } = req.file;
+      const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(originalname) || '.png'}`;
       
-      // If buffer is present (Serverless Memory Storage), store as Base64 Data URI
-      let url = `/uploads/${filename}`;
-      if (req.file.buffer) {
-        const base64 = req.file.buffer.toString('base64');
-        url = `data:${mimetype};base64,${base64}`;
-      }
+      // Convert image buffer to Base64 Data URI string for instant DB persistence & preview
+      const base64 = buffer ? buffer.toString('base64') : '';
+      const url = base64 ? `data:${mimetype};base64,${base64}` : `/uploads/${filename}`;
 
       const result = await query(
         'INSERT INTO media (filename, original_name, mime_type, size, url) VALUES ($1,$2,$3,$4,$5) RETURNING *',
@@ -91,15 +72,6 @@ router.delete('/:id', authenticateJWT, async (req: Request, res: Response) => {
     const result = await query('SELECT * FROM media WHERE id = $1', [req.params.id]);
     if (result.rows.length === 0) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Media not found' } });
     
-    if (result.rows[0].filename) {
-      const filePath = path.join(uploadDir, result.rows[0].filename);
-      try {
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      } catch (_e) {
-        // Ignore file unlink error on read-only serverless environment
-      }
-    }
-
     await query('DELETE FROM media WHERE id = $1', [req.params.id]);
     res.json({ success: true, data: { id: req.params.id } });
   } catch (error) {
