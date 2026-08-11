@@ -7,10 +7,11 @@ node_modules/
 .pnpm-store/
 package-lock.json
 
-# Build outputs
+# Build outputs & Vercel
 dist/
 build/
 .vite/
+.vercel/
 
 # Environment files & Secrets
 .env

@@ -26,10 +26,20 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
-app.use(cors({
-  origin: env.CORS_ORIGIN === '*' ? '*' : env.CORS_ORIGIN.split(','),
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (env.CORS_ORIGIN === '*' || env.NODE_ENV === 'development') return callback(null, true);
+      const allowedOrigins = env.CORS_ORIGIN.split(',').map((o) => o.trim());
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS not allowed for this origin'));
+    },
+    credentials: true,
+  })
+);
 
 // Rate limiting — Global API Limiter
 const globalLimiter = rateLimit({
