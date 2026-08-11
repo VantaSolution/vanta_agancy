@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { settingsAPI } from '@/api/endpoints';
+import { settingsAPI, authAPI } from '@/api/endpoints';
 import { useAuth } from '@/context/AuthContext';
 import { useWebsite } from '@/context/WebsiteContext';
 import { Save, Check } from 'lucide-react';
@@ -22,11 +22,43 @@ export function SettingsPage() {
   const handleSave = async () => {
     if (!settings) return;
     setIsSaving(true);
-    await settingsAPI.update(settings);
-    await refreshWebsiteData();
-    setIsSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+          alert('New password and Confirm password do not match!');
+          setIsSaving(false);
+          return;
+        }
+        if (newPassword.length < 6) {
+          alert('Password must be at least 6 characters long.');
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      await settingsAPI.update(settings);
+
+      // Update admin user credentials in database
+      await authAPI.updateProfile({
+        name: settings.admin?.name,
+        email: settings.admin?.email,
+        newPassword: newPassword || undefined,
+      });
+
+      if (newPassword) {
+        setNewPassword('');
+        setConfirmPassword('');
+        alert('Admin profile & password updated successfully!');
+      }
+
+      await refreshWebsiteData();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err: any) {
+      alert(err?.response?.data?.error?.message || 'Failed to update settings');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateGeneral = (field: string, value: string) => {

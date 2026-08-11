@@ -86,6 +86,13 @@ export const authAPI = {
     const { data } = await apiClient.get('/auth/me');
     return data.data;
   },
+
+  updateProfile: async (payload: { name?: string; email?: string; newPassword?: string }): Promise<void> => {
+    if (USE_MOCK) {
+      return;
+    }
+    await apiClient.put('/auth/profile', payload);
+  },
 };
 
 // ═══════════════════════════════════════════════════════════

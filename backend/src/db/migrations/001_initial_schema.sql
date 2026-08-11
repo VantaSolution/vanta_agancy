@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS media (
   original_name VARCHAR(255),
   mime_type VARCHAR(100),
   size INTEGER,
-  url VARCHAR(500) NOT NULL,
+  url TEXT NOT NULL,
   alt_text VARCHAR(255),
   folder VARCHAR(100) DEFAULT 'general',
   created_at TIMESTAMPTZ DEFAULT NOW()
