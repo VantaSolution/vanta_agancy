@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import { env } from './env';
 
-const connectionString = env.DIRECT_URL || env.DATABASE_URL;
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL || env.DIRECT_URL || env.DATABASE_URL;
 
 export const pool = new Pool(
   connectionString

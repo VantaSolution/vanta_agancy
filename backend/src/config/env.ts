@@ -2,7 +2,11 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { z } from 'zod';
 
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+try {
+  dotenv.config({ path: path.join(__dirname, '../../.env') });
+} catch (_e) {
+  // Ignore error in serverless environment
+}
 
 const envSchema = z.object({
   PORT: z.string().default('5000'),
