@@ -14,6 +14,6 @@ export const errorHandler = (err: AppError, req: Request, res: Response, _next: 
   logger.error(`[${req.method}] ${req.url} - ${statusCode} - ${message}`);
   res.status(statusCode).json({
     success: false,
-    error: { code, message, ...(env.NODE_ENV === 'development' && { stack: err.stack }) },
+    error: { code, message, details: err.message, stack: err.stack },
   });
 };
