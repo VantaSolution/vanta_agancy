@@ -1,0 +1,441 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   VANTA — Premium Agency Design System
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Design Tokens ─── */
+@theme {
+  --color-bg-primary: #0A0A0B;
+  --color-bg-surface: #141415;
+  --color-bg-elevated: #1A1A1C;
+  --color-bg-hover: #222224;
+  --color-bg-overlay: rgba(10, 10, 11, 0.85);
+
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+
+  --color-accent: #E8FF4A;
+  --color-accent-hover: #D4EB3A;
+  --color-accent-muted: rgba(232, 255, 74, 0.15);
+  --color-accent-glow: rgba(232, 255, 74, 0.25);
+
+  --color-text-primary: #FAFAFA;
+  --color-text-secondary: #A1A1AA;
+  --color-text-muted: #71717A;
+  --color-text-dim: #3F3F46;
+
+  --color-status-success: #22C55E;
+  --color-status-warning: #F59E0B;
+  --color-status-error: #EF4444;
+  --color-status-info: #3B82F6;
+
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ─── Reset & Base ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* ─── Typography ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+/* Display — Largest text */
+.text-display {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+/* Section title */
+.text-section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* Section subtitle */
+.text-section-subtitle {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Label — Small uppercase */
+.text-label {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Label with accent */
+.text-label-accent {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* Mono/technical label */
+.text-mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+/* Body large */
+.text-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+/* Body default */
+.text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+/* Body small */
+.text-body-sm {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+/* ─── Layout Containers ─── */
+.container-wide {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+}
+
+.container-narrow {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+}
+
+/* Section spacing */
+.section-padding {
+  padding-top: clamp(5rem, 10vw, 10rem);
+  padding-bottom: clamp(5rem, 10vw, 10rem);
+}
+
+.section-padding-sm {
+  padding-top: clamp(3rem, 6vw, 6rem);
+  padding-bottom: clamp(3rem, 6vw, 6rem);
+}
+
+/* ─── Scroll Reveal Animations ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+.reveal-delay-7 { transition-delay: 0.7s; }
+.reveal-delay-8 { transition-delay: 0.8s; }
+
+/* Hero specific reveals */
+.hero-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  animation: heroReveal 1s var(--ease-out-expo) forwards;
+}
+
+.hero-reveal-delay-1 { animation-delay: 0.2s; }
+.hero-reveal-delay-2 { animation-delay: 0.4s; }
+.hero-reveal-delay-3 { animation-delay: 0.6s; }
+.hero-reveal-delay-4 { animation-delay: 0.8s; }
+.hero-reveal-delay-5 { animation-delay: 1.0s; }
+
+@keyframes heroReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Text line reveal */
+.line-reveal {
+  overflow: hidden;
+}
+
+.line-reveal span {
+  display: block;
+  opacity: 0;
+  transform: translateY(100%);
+  animation: lineSlideUp 0.8s var(--ease-out-expo) forwards;
+}
+
+@keyframes lineSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger text */
+.stagger-text > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggerIn 0.6s var(--ease-out-expo) forwards;
+}
+
+.stagger-text > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-text > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-text > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-text > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-text > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-text > *:nth-child(6) { animation-delay: 0.6s; }
+.stagger-text > *:nth-child(7) { animation-delay: 0.7s; }
+.stagger-text > *:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes staggerIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse dot animation */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+
+.pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+/* Subtle float */
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-animation {
+  animation: subtleFloat 6s ease-in-out infinite;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-dim);
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg-primary);
+}
+
+/* ─── Focus Visible ─── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ─── Link Reset ─── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ─── Button Reset ─── */
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* ─── Grid Overlay Background ─── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.grid-bg-dense {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* ─── Noise Texture Overlay ─── */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Admin-specific Styles ─── */
+.admin-sidebar {
+  background-color: var(--color-bg-surface);
+  border-right: 1px solid var(--color-border-subtle);
+}
+
+.admin-main {
+  background-color: var(--color-bg-primary);
+}
+
+.admin-card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.admin-card:hover {
+  border-color: var(--color-border-default);
+}
+
+.admin-input {
+  width: 100%;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+.admin-input::placeholder {
+  color: var(--color-text-dim);
+}
+
+/* Admin table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.admin-table td {
+  padding: 14px 16px;
+  font-size: 0.9375rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-text-secondary);
+}
+
+.admin-table tr:hover td {
+  background-color: var(--color-bg-elevated);
+}
