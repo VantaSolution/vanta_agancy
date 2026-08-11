@@ -7,7 +7,7 @@ export const pool = new Pool(
   connectionString
     ? {
         connectionString,
-        ssl: connectionString.includes('supabase.com') || connectionString.includes('sslmode=require')
+        ssl: connectionString && !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1')
           ? { rejectUnauthorized: false }
           : undefined,
         max: 20,
