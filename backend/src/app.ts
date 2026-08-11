@@ -77,6 +77,25 @@ if (fs.existsSync(uploadsPath)) {
   app.use('/uploads', express.static(uploadsPath));
 }
 
+// Root Status Endpoint
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    name: 'VANTA Agency API',
+    version: '2.0.0',
+    status: 'online',
+    environment: env.NODE_ENV,
+    endpoints: {
+      health: '/api/health',
+      healthDb: '/api/health/db',
+      content: '/api/content',
+      services: '/api/services',
+      projects: '/api/projects',
+      auth: '/api/auth/login',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check endpoints
 app.get(['/health', '/api/health'], (_req, res) => {
   res.status(200).json({
