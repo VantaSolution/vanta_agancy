@@ -78,7 +78,7 @@ if (fs.existsSync(uploadsPath)) {
 }
 
 // Root Status Endpoint
-app.get('/', (_req, res) => {
+app.get(['/', '/api', '/api/index'], (_req, res) => {
   res.status(200).json({
     name: 'VANTA Agency API',
     version: '2.0.0',
