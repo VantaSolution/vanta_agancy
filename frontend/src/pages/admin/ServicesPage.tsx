@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { servicesAPI } from '@/api/endpoints';
 import { useWebsite } from '@/context/WebsiteContext';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, X, AlertCircle } from 'lucide-react';
 import type { Service } from '@/types';
 
 const emptyService: Partial<Service> = {
@@ -13,6 +13,13 @@ export function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingService, setEditingService] = useState<Partial<Service>>(emptyService);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
 
   const load = async () => {
     const list = await servicesAPI.list();
@@ -24,33 +31,76 @@ export function ServicesPage() {
 
   const handleSave = async () => {
     if (!editingService.name) return;
-    if (editingService.id) {
-      await servicesAPI.update(editingService.id, editingService);
-    } else {
-      await servicesAPI.create(editingService);
+    setSaving(true);
+    try {
+      if (editingService.id) {
+        await servicesAPI.update(editingService.id, editingService);
+      } else {
+        await servicesAPI.create(editingService);
+      }
+      setIsEditing(false);
+      setEditingService(emptyService);
+      showToast('Service saved successfully', 'success');
+      await load();
+    } catch (error: any) {
+      console.error('Failed to save service:', error);
+      const msg = error?.response?.data?.error?.message || error?.message || 'Failed to save service. Please check your connection and try again.';
+      showToast(msg, 'error');
+    } finally {
+      setSaving(false);
     }
-    setIsEditing(false);
-    setEditingService(emptyService);
-    await load();
   };
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this service?')) {
-      await servicesAPI.delete(id);
-      await load();
+      try {
+        await servicesAPI.delete(id);
+        showToast('Service deleted', 'success');
+        await load();
+      } catch (error: any) {
+        console.error('Failed to delete service:', error);
+        showToast('Failed to delete service. Please try again.', 'error');
+      }
     }
   };
 
   const toggleActive = async (service: Service) => {
-    await servicesAPI.update(service.id, { isActive: !service.isActive });
-    await load();
+    try {
+      await servicesAPI.update(service.id, { isActive: !service.isActive });
+      showToast(service.isActive ? 'Service disabled' : 'Service activated', 'success');
+      await load();
+    } catch (error: any) {
+      console.error('Failed to toggle active:', error);
+      showToast('Failed to update service status. Please try again.', 'error');
+    }
   };
 
   const fieldStyle: React.CSSProperties = { width: '100%', background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: '8px', padding: '10px 14px', color: 'var(--color-text-primary)', fontSize: '0.9375rem', fontFamily: 'var(--font-body)', outline: 'none' };
   const labelStyle: React.CSSProperties = { display: 'block', marginBottom: '6px', fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'var(--color-text-muted)' };
 
+  const toastStyle: React.CSSProperties = {
+    position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 2000,
+    display: 'flex', alignItems: 'center', gap: '10px',
+    padding: '14px 20px', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 500,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+    animation: 'fadeInUp 0.3s ease-out',
+  };
+
   return (
     <div>
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          ...toastStyle,
+          backgroundColor: toast.type === 'error' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
+          border: `1px solid ${toast.type === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)'}`,
+          color: toast.type === 'error' ? '#f87171' : '#4ade80',
+        }}>
+          {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+          {toast.message}
+          <button onClick={() => setToast(null)} style={{ marginLeft: '8px', cursor: 'pointer', color: 'inherit', opacity: 0.7 }}><X size={14} /></button>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.25rem' }}>Services</h1>
@@ -192,7 +242,7 @@ export function ServicesPage() {
               {/* Actions */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
                 <button onClick={() => setIsEditing(false)} style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid var(--color-border-subtle)', background: 'none', cursor: 'pointer' }}>Cancel</button>
-                <button onClick={handleSave} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', backgroundColor: 'var(--color-accent)', color: 'var(--color-bg-primary)', fontWeight: 600, cursor: 'pointer' }}>Save Service</button>
+                <button onClick={handleSave} disabled={saving} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', backgroundColor: 'var(--color-accent)', color: 'var(--color-bg-primary)', fontWeight: 600, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save Service'}</button>
               </div>
             </div>
           </div>

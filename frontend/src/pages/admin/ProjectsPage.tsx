@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { projectsAPI } from '@/api/endpoints';
 import { useWebsite } from '@/context/WebsiteContext';
-import { Plus, Edit2, Trash2, Eye, EyeOff, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import type { Project } from '@/types';
 
 const emptyProject: Partial<Project> = {
@@ -17,6 +17,13 @@ export function ProjectsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingProject, setEditingProject] = useState<Partial<Project>>(emptyProject);
   const [techInput, setTechInput] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = useCallback((message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
 
   const load = async () => {
     const list = await projectsAPI.list();
@@ -28,26 +35,48 @@ export function ProjectsPage() {
 
   const handleSave = async () => {
     if (!editingProject.name) return;
-    if (editingProject.id) {
-      await projectsAPI.update(editingProject.id, editingProject);
-    } else {
-      await projectsAPI.create(editingProject);
+    setSaving(true);
+    try {
+      if (editingProject.id) {
+        await projectsAPI.update(editingProject.id, editingProject);
+      } else {
+        await projectsAPI.create(editingProject);
+      }
+      setIsEditing(false);
+      setEditingProject(emptyProject);
+      showToast('Project saved successfully', 'success');
+      await load();
+    } catch (error: any) {
+      console.error('Failed to save project:', error);
+      const msg = error?.response?.data?.error?.message || error?.message || 'Failed to save project. Please check your connection and try again.';
+      showToast(msg, 'error');
+    } finally {
+      setSaving(false);
     }
-    setIsEditing(false);
-    setEditingProject(emptyProject);
-    await load();
   };
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this project?')) {
-      await projectsAPI.delete(id);
-      await load();
+      try {
+        await projectsAPI.delete(id);
+        showToast('Project deleted', 'success');
+        await load();
+      } catch (error: any) {
+        console.error('Failed to delete project:', error);
+        showToast('Failed to delete project. Please try again.', 'error');
+      }
     }
   };
 
   const togglePublish = async (project: Project) => {
-    await projectsAPI.update(project.id, { isPublished: !project.isPublished });
-    await load();
+    try {
+      await projectsAPI.update(project.id, { isPublished: !project.isPublished });
+      showToast(project.isPublished ? 'Project unpublished' : 'Project published', 'success');
+      await load();
+    } catch (error: any) {
+      console.error('Failed to toggle publish:', error);
+      showToast('Failed to update publish status. Please try again.', 'error');
+    }
   };
 
   const addTech = () => {
@@ -64,8 +93,29 @@ export function ProjectsPage() {
   const fieldStyle: React.CSSProperties = { width: '100%', background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: '8px', padding: '10px 14px', color: 'var(--color-text-primary)', fontSize: '0.9375rem', fontFamily: 'var(--font-body)', outline: 'none' };
   const labelStyle: React.CSSProperties = { display: 'block', marginBottom: '6px', fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'var(--color-text-muted)' };
 
+  const toastStyle: React.CSSProperties = {
+    position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 2000,
+    display: 'flex', alignItems: 'center', gap: '10px',
+    padding: '14px 20px', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 500,
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+    animation: 'fadeInUp 0.3s ease-out',
+  };
+
   return (
     <div>
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          ...toastStyle,
+          backgroundColor: toast.type === 'error' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
+          border: `1px solid ${toast.type === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)'}`,
+          color: toast.type === 'error' ? '#f87171' : '#4ade80',
+        }}>
+          {toast.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+          {toast.message}
+          <button onClick={() => setToast(null)} style={{ marginLeft: '8px', cursor: 'pointer', color: 'inherit', opacity: 0.7 }}><X size={14} /></button>
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.25rem' }}>Projects</h1>
@@ -283,7 +333,7 @@ export function ProjectsPage() {
               {/* Actions */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
                 <button onClick={() => setIsEditing(false)} style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid var(--color-border-subtle)', background: 'none', cursor: 'pointer' }}>Cancel</button>
-                <button onClick={handleSave} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', backgroundColor: 'var(--color-accent)', color: 'var(--color-bg-primary)', fontWeight: 600, cursor: 'pointer' }}>Save Project</button>
+                <button onClick={handleSave} disabled={saving} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', backgroundColor: 'var(--color-accent)', color: 'var(--color-bg-primary)', fontWeight: 600, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save Project'}</button>
               </div>
             </div>
           </div>
