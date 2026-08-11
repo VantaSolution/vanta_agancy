@@ -1,21 +1,22 @@
-import winston from 'winston';
 import { env } from '../config/env';
 
-// Vercel Serverless Console Logger (No read-only filesystem writes)
-
-const levels = { error: 0, warn: 1, info: 2, http: 3, debug: 4 };
-const colors = { error: 'red', warn: 'yellow', info: 'green', http: 'magenta', debug: 'white' };
-winston.addColors(colors);
-
-const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf((info) => `[${info.timestamp}] [${info.level}]: ${info.message}`)
-);
-
-export const logger = winston.createLogger({
-  level: env.NODE_ENV === 'development' ? 'debug' : 'info',
-  levels,
-  format,
-  transports: [new winston.transports.Console()],
-});
+// Production & Serverless Console Logger
+export const logger = {
+  info: (message: string) => {
+    console.log(`[${new Date().toISOString()}] [INFO]: ${message}`);
+  },
+  warn: (message: string) => {
+    console.warn(`[${new Date().toISOString()}] [WARN]: ${message}`);
+  },
+  error: (message: string) => {
+    console.error(`[${new Date().toISOString()}] [ERROR]: ${message}`);
+  },
+  http: (message: string) => {
+    console.log(`[${new Date().toISOString()}] [HTTP]: ${message}`);
+  },
+  debug: (message: string) => {
+    if (env.NODE_ENV === 'development') {
+      console.log(`[${new Date().toISOString()}] [DEBUG]: ${message}`);
+    }
+  },
+};
