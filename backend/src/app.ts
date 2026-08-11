@@ -77,9 +77,33 @@ if (fs.existsSync(uploadsPath)) {
   app.use('/uploads', express.static(uploadsPath));
 }
 
-// Health check
-app.get('/health', (_req, res) => {
-  res.status(200).json({ success: true, message: 'VANTA API is healthy', timestamp: new Date().toISOString() });
+// Health check endpoints
+app.get(['/health', '/api/health'], (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    service: 'backend',
+    environment: env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get(['/health/db', '/api/health/db'], async (_req, res) => {
+  try {
+    const { query } = require('./config/db');
+    const result = await query('SELECT 1 as alive');
+    res.status(200).json({
+      status: 'ok',
+      database: 'connected',
+      result: result.rows[0],
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: 'error',
+      database: 'disconnected',
+      error: error?.message || 'Database query failed',
+    });
+  }
 });
 
 // API Routes (Support both /api/* and /*)
