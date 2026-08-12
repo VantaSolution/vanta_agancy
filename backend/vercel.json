@@ -1,6 +1,7 @@
 {
   "version": 2,
   "outputDirectory": "dist",
+  "regions": ["arn1", "fra1"],
   "rewrites": [
     {
       "source": "/(.*)",
