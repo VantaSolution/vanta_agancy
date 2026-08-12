@@ -7,8 +7,10 @@ const router = Router();
 // GET /api/dashboard/stats — Protected
 router.get('/stats', authenticateJWT, async (_req: Request, res: Response) => {
   try {
-    const projectsRes = await query('SELECT count(*) as total, count(*) FILTER (WHERE is_published = true) as published, count(*) FILTER (WHERE is_published = false) as draft FROM projects');
-    const messagesRes = await query("SELECT count(*) as total, count(*) FILTER (WHERE status = 'new') as unread FROM messages");
+    const [projectsRes, messagesRes] = await Promise.all([
+      query('SELECT count(*) as total, count(*) FILTER (WHERE is_published = true) as published, count(*) FILTER (WHERE is_published = false) as draft FROM projects'),
+      query("SELECT count(*) as total, count(*) FILTER (WHERE status = 'new') as unread FROM messages"),
+    ]);
 
     const projectStats = projectsRes.rows[0] || { total: 0, published: 0, draft: 0 };
     const messageStats = messagesRes.rows[0] || { total: 0, unread: 0 };

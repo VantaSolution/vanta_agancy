@@ -7,6 +7,7 @@ const router = Router();
 // GET /api/content — Public
 router.get('/', async (_req: Request, res: Response) => {
   try {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
     const result = await query('SELECT * FROM website_content');
     const content: Record<string, any> = {};
     result.rows.forEach((row: any) => {

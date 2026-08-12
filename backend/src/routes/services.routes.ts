@@ -9,6 +9,9 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const activeOnly = req.query.active === 'true';
+    if (activeOnly) {
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+    }
     const sql = activeOnly
       ? 'SELECT * FROM services WHERE is_active = true ORDER BY display_order ASC'
       : 'SELECT * FROM services ORDER BY display_order ASC';

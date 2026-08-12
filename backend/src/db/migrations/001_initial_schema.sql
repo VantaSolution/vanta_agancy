@@ -97,9 +97,12 @@ CREATE TABLE IF NOT EXISTS media (
 -- ─── Indexes ───
 CREATE INDEX IF NOT EXISTS idx_projects_published ON projects(is_published);
 CREATE INDEX IF NOT EXISTS idx_projects_display_order ON projects(display_order);
+CREATE INDEX IF NOT EXISTS idx_projects_published_order ON projects(is_published, display_order ASC);
 CREATE INDEX IF NOT EXISTS idx_services_active ON services(is_active);
 CREATE INDEX IF NOT EXISTS idx_services_display_order ON services(display_order);
+CREATE INDEX IF NOT EXISTS idx_services_active_order ON services(is_active, display_order ASC);
 CREATE INDEX IF NOT EXISTS idx_messages_status ON messages(status);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_website_content_section ON website_content(section);
 CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);
+

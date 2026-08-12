@@ -31,6 +31,9 @@ function isValidUrlOrPath(urlStr: string): boolean {
 router.get('/', async (req: Request, res: Response) => {
   try {
     const isPublicOnly = req.query.published === 'true';
+    if (isPublicOnly) {
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+    }
     const sql = isPublicOnly
       ? 'SELECT * FROM projects WHERE is_published = true ORDER BY display_order ASC'
       : 'SELECT * FROM projects ORDER BY display_order ASC';

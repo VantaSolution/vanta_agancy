@@ -31,16 +31,23 @@ function ProjectCard({ project }: { project: Project }) {
     >
       {/* Project Image */}
       {project.projectImage && (
-        <div
-          style={{
-            width: '100%',
-            height: '240px',
-            backgroundColor: 'var(--color-bg-elevated)',
-            backgroundImage: `url(${project.projectImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
+        <div style={{ width: '100%', height: '240px', overflow: 'hidden', backgroundColor: 'var(--color-bg-elevated)' }}>
+          <img
+            src={project.projectImage}
+            alt={project.name}
+            loading="lazy"
+            decoding="async"
+            width={400}
+            height={240}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              display: 'block',
+            }}
+          />
+        </div>
       )}
 
       {/* Project Info */}
