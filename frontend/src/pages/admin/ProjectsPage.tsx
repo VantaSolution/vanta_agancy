@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { projectsAPI } from '@/api/endpoints';
+import { projectsAPI, mediaAPI } from '@/api/endpoints';
 import { useWebsite } from '@/context/WebsiteContext';
-import { Plus, Edit2, Trash2, Eye, EyeOff, X, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, EyeOff, X, AlertCircle, CheckCircle2, Upload } from 'lucide-react';
 import type { Project } from '@/types';
 
 const emptyProject: Partial<Project> = {
@@ -18,7 +18,25 @@ export function ProjectsPage() {
   const [editingProject, setEditingProject] = useState<Partial<Project>>(emptyProject);
   const [techInput, setTechInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const mediaItem = await mediaAPI.upload(file);
+      setEditingProject((p) => ({ ...p, projectImage: mediaItem.url }));
+      showToast('Image uploaded successfully', 'success');
+    } catch (err: any) {
+      console.error('Image upload failed:', err);
+      const msg = err?.response?.data?.error?.message || err?.message || 'Failed to upload image';
+      showToast(msg, 'error');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const showToast = useCallback((message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -286,7 +304,14 @@ export function ProjectsPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Project Image URL</label>
-                  <input type="text" value={editingProject.projectImage || ''} onChange={(e) => setEditingProject((p) => ({ ...p, projectImage: e.target.value }))} style={fieldStyle} />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input type="text" value={editingProject.projectImage || ''} onChange={(e) => setEditingProject((p) => ({ ...p, projectImage: e.target.value }))} placeholder="https://..." style={fieldStyle} />
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--color-border-subtle)', backgroundColor: 'var(--color-bg-elevated)', cursor: uploadingImage ? 'wait' : 'pointer', fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>
+                      <Upload size={14} />
+                      {uploadingImage ? '...' : 'Upload'}
+                      <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} disabled={uploadingImage} />
+                    </label>
+                  </div>
                 </div>
               </div>
 

@@ -25,6 +25,10 @@ const envSchema = z.object({
   ADMIN_PASSWORD: z.string().default('admin123'),
   DATABASE_URL: z.string().optional(),
   DIRECT_URL: z.string().optional(),
+  SUPABASE_URL: z.string().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  SUPABASE_KEY: z.string().optional(),
+  SUPABASE_STORAGE_BUCKET: z.string().default('vanta-media'),
 });
 
 const parseEnv = () => {
