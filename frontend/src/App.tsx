@@ -3,10 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { WebsiteProvider } from '@/context/WebsiteContext';
 import { HomePage } from '@/pages/HomePage';
-import { LoginPage } from '@/pages/LoginPage';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 
-// Route-level code-splitting for Admin Panel pages
+// Lazy-load all Admin-related pages and layouts to exclude Admin Panel code from initial public JS bundle
+const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
+const AdminLayout = lazy(() => import('@/components/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then((m) => ({ default: m.DashboardPage })));
 const ProjectsPage = lazy(() => import('@/pages/admin/ProjectsPage').then((m) => ({ default: m.ProjectsPage })));
 const ServicesPage = lazy(() => import('@/pages/admin/ServicesPage').then((m) => ({ default: m.ServicesPage })));
@@ -39,18 +39,20 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public Website — Eagerly loaded for zero-delay paint */}
+      {/* Public Website — Eagerly loaded for zero-delay initial render */}
       <Route path="/" element={<HomePage />} />
 
-      {/* Admin Auth */}
-      <Route path="/admin/login" element={<LoginPage />} />
+      {/* Admin Auth (Lazy Loaded) */}
+      <Route path="/admin/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
 
       {/* Admin Panel (Protected + Lazy Loaded) */}
       <Route
         path="/admin"
         element={
           <ProtectedRoute>
-            <AdminLayout />
+            <Suspense fallback={<PageLoader />}>
+              <AdminLayout />
+            </Suspense>
           </ProtectedRoute>
         }
       >
