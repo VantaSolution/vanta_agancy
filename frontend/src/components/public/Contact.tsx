@@ -166,8 +166,10 @@ export function Contact() {
               <form onSubmit={handleSubmit}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <div>
-                    <label style={labelStyle}>Name *</label>
+                    <label htmlFor="contact-name" style={labelStyle}>Name *</label>
                     <input
+                      id="contact-name"
+                      aria-label="Name"
                       type="text"
                       value={formData.name}
                       onChange={(e) => handleChange('name', e.target.value)}
@@ -179,8 +181,10 @@ export function Contact() {
                     {errors.name && <span style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>{errors.name}</span>}
                   </div>
                   <div>
-                    <label style={labelStyle}>Email *</label>
+                    <label htmlFor="contact-email" style={labelStyle}>Email *</label>
                     <input
+                      id="contact-email"
+                      aria-label="Email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleChange('email', e.target.value)}
@@ -194,8 +198,10 @@ export function Contact() {
                 </div>
 
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <label style={labelStyle}>Company</label>
+                  <label htmlFor="contact-company" style={labelStyle}>Company</label>
                   <input
+                    id="contact-company"
+                    aria-label="Company"
                     type="text"
                     value={formData.company}
                     onChange={(e) => handleChange('company', e.target.value)}
@@ -208,8 +214,10 @@ export function Contact() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <div>
-                    <label style={labelStyle}>Project Type</label>
+                    <label htmlFor="project-type" style={labelStyle}>Project Type</label>
                     <select
+                      id="project-type"
+                      aria-label="Project Type"
                       value={formData.projectType}
                       onChange={(e) => handleChange('projectType', e.target.value)}
                       style={{
@@ -232,8 +240,10 @@ export function Contact() {
                     </select>
                   </div>
                   <div>
-                    <label style={labelStyle}>Budget Range</label>
+                    <label htmlFor="budget-range" style={labelStyle}>Budget Range</label>
                     <select
+                      id="budget-range"
+                      aria-label="Budget Range"
                       value={formData.budgetRange}
                       onChange={(e) => handleChange('budgetRange', e.target.value)}
                       style={{
@@ -258,8 +268,10 @@ export function Contact() {
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={labelStyle}>Project Details *</label>
+                  <label htmlFor="contact-message" style={labelStyle}>Project Details *</label>
                   <textarea
+                    id="contact-message"
+                    aria-label="Project Details"
                     value={formData.message}
                     onChange={(e) => handleChange('message', e.target.value)}
                     placeholder="Tell us about your project, goals, timeline, and any specific requirements..."

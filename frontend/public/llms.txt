@@ -1,0 +1,29 @@
+# VANTA Agency — Digital Studio
+
+> VANTA Agency is a full-stack digital studio specializing in high-performance web development, custom web applications, digital products, and brand experiences engineered for speed, conversion, and scalability.
+
+## Core Services
+
+- **Web Development**: Custom React & TypeScript web applications engineered for speed, security, and real-world performance.
+- **UI/UX Design**: Modern, conversion-focused interface design and visual design systems.
+- **API Engineering**: Robust RESTful APIs powered by Node.js, Express, and PostgreSQL.
+- **Performance Optimization**: Deep Core Web Vitals optimization, bundle splitting, and edge infrastructure alignment.
+
+## Core Technology Stack
+
+- **Frontend**: React 18, Vite 5, TypeScript 5, TailwindCSS / CSS Modules
+- **Backend**: Node.js, Express 4, TypeScript 5, JWT Authentication
+- **Database**: PostgreSQL 15, Supabase
+- **Storage**: Supabase Storage CDN (`vanta-media`)
+- **Deployment**: Vercel Serverless Production (European Region `fra1`)
+
+## Public Resources & Navigation
+
+- [VANTA Agency Homepage](https://vanta-agency-frontend.vercel.app/)
+- [Selected Work & Portfolio](https://vanta-agency-frontend.vercel.app/#work)
+- [Agency Services](https://vanta-agency-frontend.vercel.app/#services)
+- [Core Capabilities](https://vanta-agency-frontend.vercel.app/#capabilities)
+- [Development Process](https://vanta-agency-frontend.vercel.app/#process)
+- [Technology Constellation](https://vanta-agency-frontend.vercel.app/#technology)
+- [About VANTA Agency](https://vanta-agency-frontend.vercel.app/#about)
+- [Contact & Project Inquiry](https://vanta-agency-frontend.vercel.app/#contact)
