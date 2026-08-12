@@ -6,20 +6,24 @@ import { ArrowUpRight, ChevronDown } from 'lucide-react';
 function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const animationRef = useRef<number>(0);
   const nodesRef = useRef<{ x: number; y: number; vx: number; vy: number; radius: number; }[]>([]);
+  const dimensionsRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
   const init = useCallback((canvas: HTMLCanvasElement) => {
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    const width = rect.width;
+    const height = rect.height;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    dimensionsRef.current = { width, height };
     const ctx = canvas.getContext('2d');
     if (ctx) ctx.scale(dpr, dpr);
 
     // Create nodes
-    const nodeCount = Math.min(40, Math.floor(rect.width / 25));
+    const nodeCount = Math.min(40, Math.floor(width / 25));
     nodesRef.current = Array.from({ length: nodeCount }, () => ({
-      x: Math.random() * rect.width,
-      y: Math.random() * rect.height,
+      x: Math.random() * width,
+      y: Math.random() * height,
       vx: (Math.random() - 0.5) * 0.4,
       vy: (Math.random() - 0.5) * 0.4,
       radius: Math.random() * 2 + 1,
@@ -30,9 +34,8 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
+    const { width, height } = dimensionsRef.current;
+    if (width === 0 || height === 0) return;
 
     ctx.clearRect(0, 0, width, height);
 
