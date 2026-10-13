@@ -104,10 +104,11 @@ export const en: TranslationDictionary = {
     webDevelopment: 'WEB DEVELOPMENT',
     established: 'EST. 2026',
     availableForProjects: 'AVAILABLE FOR PROJECTS',
+    reachOut: 'Get in Touch',
     version: 'VANTA.STUDIO — V2.0',
     headline: 'WE BUILD DIGITAL EXPERIENCES\nTHAT MOVE BUSINESSES FORWARD.',
     description: 'We design and develop fast, modern websites and digital products for businesses that want to stand out, perform better, and grow.',
-    primaryCta: 'Start a Project',
+    primaryCta: "Let's Turn Your Idea Into Reality",
     secondaryCta: 'View Our Work',
   },
 
@@ -202,6 +203,10 @@ export const en: TranslationDictionary = {
   process: {
     tag: '// PROCESS',
     heading: 'FROM IDEA TO LAUNCH',
+    ctaTag: '// START YOUR JOURNEY',
+    ctaHeading: 'Ready to take your idea to the next level?',
+    ctaDescription: 'We are here to help build an exceptional digital product that drives growth and lasting impact.',
+    ctaButton: "Let's Turn Your Idea Into Reality",
     steps: [
       {
         number: '01',

@@ -156,8 +156,20 @@ const SEED_TRANSLATIONS: Record<string, { ar: string; en: string }> = {
     ar: 'نصمم ونطور مواقع ويب فائقة السرعة وتطبيقات حديثة تلبي طموحات الشركات الراغبة في التميز، الأداء العالي، والمظهر الاحترافي الراقي.',
   },
   'Start a Project': {
-    en: 'Start a Project',
-    ar: 'ابدأ مشروعك معنا',
+    en: "Let's Turn Your Idea Into Reality",
+    ar: 'يلا نحوّل فكرتك لواقع',
+  },
+  'ابدأ مشروعك معنا': {
+    en: "Let's Turn Your Idea Into Reality",
+    ar: 'يلا نحوّل فكرتك لواقع',
+  },
+  "Let's Turn Your Idea Into Reality": {
+    en: "Let's Turn Your Idea Into Reality",
+    ar: 'يلا نحوّل فكرتك لواقع',
+  },
+  'يلا نحوّل فكرتك لواقع': {
+    en: "Let's Turn Your Idea Into Reality",
+    ar: 'يلا نحوّل فكرتك لواقع',
   },
   'View Our Work': {
     en: 'View Our Work',

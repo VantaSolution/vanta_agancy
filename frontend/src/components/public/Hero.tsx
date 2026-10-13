@@ -222,69 +222,51 @@ export function Hero() {
             {description}
           </p>
 
-          {/* CTAs */}
+          {/* Exploration Action */}
           <div
             className="hero-reveal hero-reveal-delay-4"
-            style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
+            style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}
           >
             <button
-              onClick={scrollToContact}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '14px 28px',
-                fontSize: '0.9375rem',
-                fontWeight: 600,
-                color: 'var(--color-bg-primary)',
-                backgroundColor: 'var(--color-accent)',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.25s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-accent-hover)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 30px rgba(0, 210, 255, 0.25)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--color-accent)';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-            >
-              <span>{primaryCta}</span>
-              <ArrowUpRight size={16} strokeWidth={2.5} className="rtl-arrow-up-right" />
-            </button>
-
-            <button
               onClick={scrollToWork}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '14px 28px',
-                fontSize: '0.9375rem',
-                fontWeight: 500,
-                color: 'var(--color-text-primary)',
-                backgroundColor: 'transparent',
-                borderRadius: '6px',
-                border: '1px solid var(--color-border-strong)',
-                cursor: 'pointer',
-                transition: 'all 0.25s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-accent)';
-                e.currentTarget.style.color = 'var(--color-accent)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--color-border-strong)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }}
+              className="hero-explore-btn"
+              aria-label={secondaryCta}
             >
               <span>{secondaryCta}</span>
-              <ChevronDown size={16} />
+              <ChevronDown size={16} className="hero-explore-chevron" />
+            </button>
+          </div>
+
+          {/* Prominent Availability Badge — Repositioned further DOWN within Hero */}
+          <div
+            className="hero-reveal hero-reveal-delay-5"
+            style={{
+              marginTop: 'clamp(2.75rem, 5.5vh, 4.5rem)',
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <button
+              type="button"
+              onClick={scrollToContact}
+              className="hero-availability-badge"
+              aria-label={`${t('hero.availableForProjects')} - ${t('hero.reachOut')}`}
+            >
+              <span className="availability-dot-wrapper" aria-hidden="true">
+                <span className="availability-dot-ping" />
+                <span className="availability-dot-core" />
+              </span>
+
+              <span className="availability-badge-text">
+                {t('hero.availableForProjects')}
+              </span>
+
+              <span className="availability-badge-divider" aria-hidden="true">|</span>
+
+              <span className="availability-badge-action">
+                <span>{t('hero.reachOut')}</span>
+                <ArrowUpRight size={14} strokeWidth={2.5} className="rtl-arrow-up-right availability-badge-arrow" />
+              </span>
             </button>
           </div>
         </div>
@@ -305,24 +287,12 @@ export function Hero() {
             pointerEvents: 'none',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span
-              className="pulse-dot"
-              style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-accent)',
-                display: 'inline-block',
-              }}
-            />
-            <span className="text-mono" style={{ color: 'var(--color-text-muted)', fontSize: '0.6875rem' }}>
-              {t('hero.availableForProjects')}
-            </span>
-          </div>
-
-          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.6875rem' }}>
+          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem' }}>
             {t('hero.version')}
+          </span>
+
+          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem', opacity: 0.65 }}>
+            {isRtl ? 'تمرير للاستكشاف ↓' : 'Scroll to explore ↓'}
           </span>
         </div>
       </div>
