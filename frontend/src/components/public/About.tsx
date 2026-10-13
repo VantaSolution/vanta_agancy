@@ -1,23 +1,18 @@
 import React from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useWebsite } from '@/context/WebsiteContext';
+import { useTranslation } from '@/i18n';
 
 export function About() {
   const ref = useScrollReveal(0.15);
   const { content } = useWebsite();
+  const { t, decode, dict } = useTranslation();
 
-  const aboutContent = content?.about || {
-    heading: "SMALL STUDIO.\nBIG DIGITAL IMPACT.",
-    description: "We're a focused digital studio that combines design, development, strategy, and performance into one seamless process.",
-    supportingContent: "Every project we take on gets the full attention of our senior team.",
-  };
+  const heading = content?.about?.heading ? decode(content.about.heading) : t('about.heading');
+  const description = content?.about?.description ? decode(content.about.description) : t('about.description');
+  const supportingContent = content?.about?.supportingContent ? decode(content.about.supportingContent) : t('about.supportingContent');
 
-  const pillars = [
-    { label: 'Design', desc: 'Visual systems that communicate' },
-    { label: 'Development', desc: 'Clean code, modern architecture' },
-    { label: 'Strategy', desc: 'Business-aligned decisions' },
-    { label: 'Performance', desc: 'Speed and reliability' },
-  ];
+  const pillars = dict.about.pillars;
 
   return (
     <section id="about" className="section-padding">
@@ -34,16 +29,16 @@ export function About() {
           {/* Left */}
           <div>
             <span className="text-label-accent" style={{ display: 'block', marginBottom: '1.5rem' }}>
-              // ABOUT
+              {t('about.tag')}
             </span>
             <h2 className="text-section-title" style={{ marginBottom: '1.5rem', whiteSpace: 'pre-line' }}>
-              {aboutContent.heading}
+              {heading}
             </h2>
-            <p className="text-body-lg" style={{ marginBottom: '1.5rem', maxWidth: '460px' }}>
-              {aboutContent.description}
+            <p className="text-body-lg" style={{ marginBottom: '1.5rem', maxWidth: '480px' }}>
+              {description}
             </p>
-            <p className="text-body" style={{ maxWidth: '460px' }}>
-              {aboutContent.supportingContent}
+            <p className="text-body" style={{ maxWidth: '480px' }}>
+              {supportingContent}
             </p>
           </div>
 
@@ -65,6 +60,7 @@ export function About() {
                       height: '8px',
                       backgroundColor: 'var(--color-accent)',
                       transform: 'rotate(45deg)',
+                      flexShrink: 0,
                     }}
                   />
                   <span
@@ -78,7 +74,7 @@ export function About() {
                     {pillar.label}
                   </span>
                 </div>
-                <p className="text-body-sm" style={{ paddingLeft: '20px' }}>
+                <p className="text-body-sm" style={{ paddingInlineStart: '20px' }}>
                   {pillar.desc}
                 </p>
               </div>

@@ -1,19 +1,23 @@
 import React from 'react';
 import { useNavbar } from '@/hooks/useNavbar';
 import { useWebsite } from '@/context/WebsiteContext';
+import { useTranslation } from '@/i18n';
 import { ArrowUpRight } from 'lucide-react';
-
-const navLinks = [
-  { label: 'Services', href: '#services' },
-  { label: 'Work', href: '#work' },
-  { label: 'Process', href: '#process' },
-  { label: 'About', href: '#about' },
-];
+import { LanguageToggle } from '@/components/common/LanguageToggle';
 
 export function Navbar() {
-  const { isScrolled, isMobileMenuOpen, toggleMobileMenu, closeMobileMenu } = useNavbar();
+  const { isScrolled, isMobileMenuOpen, activeSection, toggleMobileMenu, closeMobileMenu } = useNavbar();
   const { settings } = useWebsite();
-  const agencyName = settings?.general?.agencyName || 'VANTA';
+  const { t, decode, isRtl } = useTranslation();
+  const rawAgencyName = settings?.general?.agencyName || 'VANTA';
+  const agencyName = decode(rawAgencyName) || 'VANTA';
+
+  const navLinks = [
+    { label: t('nav.services'), href: '#services', id: 'services' },
+    { label: t('nav.work'), href: '#work', id: 'work' },
+    { label: t('nav.process'), href: '#process', id: 'process' },
+    { label: t('nav.about'), href: '#about', id: 'about' },
+  ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -35,18 +39,25 @@ export function Navbar() {
 
   return (
     <>
+      {/* Accessible Skip Link */}
+      <a href="#main-content" className="skip-link">
+        {isRtl ? 'الانتقال إلى المحتوى الرئيسي' : 'Skip to main content'}
+      </a>
+
       <nav
+        role="navigation"
+        aria-label={t('nav.mainNav')}
         style={{
           position: 'fixed',
           top: 0,
-          left: 0,
-          right: 0,
+          insetInlineStart: 0,
+          insetInlineEnd: 0,
           zIndex: 1000,
           padding: isScrolled ? '12px 0' : '20px 0',
-          backgroundColor: isScrolled ? 'rgba(10, 10, 11, 0.9)' : 'transparent',
+          backgroundColor: isScrolled ? 'rgba(9, 10, 15, 0.88)' : 'transparent',
           backdropFilter: isScrolled ? 'blur(20px)' : 'none',
           WebkitBackdropFilter: isScrolled ? 'blur(20px)' : 'none',
-          borderBottom: isScrolled ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent',
+          borderBottom: isScrolled ? '1px solid var(--color-border-subtle)' : '1px solid transparent',
           transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
@@ -55,11 +66,12 @@ export function Navbar() {
           <a
             href="#"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            aria-label={`${agencyName} - ${t('nav.home')}`}
             style={{
-              fontFamily: 'var(--font-heading)',
+              fontFamily: isRtl ? 'var(--font-arabic-heading)' : 'var(--font-heading)',
               fontSize: '1.25rem',
               fontWeight: 700,
-              letterSpacing: '0.08em',
+              letterSpacing: isRtl ? 'normal' : '0.08em',
               color: 'var(--color-text-primary)',
               textDecoration: 'none',
               textTransform: 'uppercase',
@@ -69,28 +81,50 @@ export function Navbar() {
           </a>
 
           {/* Desktop Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }} className="desktop-nav">
-            <div style={{ display: 'flex', gap: '2rem' }}>
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  style={{
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    letterSpacing: '0.04em',
-                    color: 'var(--color-text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
-                >
-                  {link.label}
-                </a>
-              ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }} className="desktop-nav">
+            <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'center' }}>
+              {navLinks.map((link) => {
+                const isActive = activeSection === link.id;
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    aria-current={isActive ? 'page' : undefined}
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: isActive ? 600 : 500,
+                      letterSpacing: isRtl ? 'normal' : '0.04em',
+                      color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                      textDecoration: 'none',
+                      position: 'relative',
+                      padding: '4px 0',
+                      transition: 'color 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)')}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          bottom: '-2px',
+                          insetInlineStart: 0,
+                          insetInlineEnd: 0,
+                          height: '2px',
+                          backgroundColor: 'var(--color-accent)',
+                          borderRadius: '1px',
+                        }}
+                      />
+                    )}
+                  </a>
+                );
+              })}
             </div>
+
+            {/* Language Switcher */}
+            <LanguageToggle variant="badge" />
 
             {/* CTA Button */}
             <a
@@ -118,97 +152,128 @@ export function Navbar() {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              Start a Project
-              <ArrowUpRight size={14} />
+              <span>{t('nav.startProject')}</span>
+              <ArrowUpRight size={14} className="rtl-arrow-up-right" />
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            className="mobile-toggle"
-            aria-label="Toggle Menu"
-            style={{
-              display: 'none',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              gap: '5px',
-              width: '32px',
-              height: '32px',
-              padding: '4px',
-            }}
-          >
-            <span
+          {/* Mobile Right Controls */}
+          <div style={{ display: 'none', alignItems: 'center', gap: '10px' }} className="mobile-controls">
+            <LanguageToggle variant="badge" />
+            <button
+              onClick={toggleMobileMenu}
+              className="mobile-toggle"
+              aria-label={isMobileMenuOpen ? t('nav.closeMenu') : t('nav.menu')}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-nav-menu"
               style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: 'var(--color-text-primary)',
-                transition: 'all 0.3s ease',
-                transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '5px',
+                width: '40px',
+                height: '40px',
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid var(--color-border-subtle)',
+                backgroundColor: 'var(--color-bg-elevated)',
               }}
-            />
-            <span
-              style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: 'var(--color-text-primary)',
-                transition: 'all 0.3s ease',
-                opacity: isMobileMenuOpen ? 0 : 1,
-              }}
-            />
-            <span
-              style={{
-                width: '100%',
-                height: '2px',
-                backgroundColor: 'var(--color-text-primary)',
-                transition: 'all 0.3s ease',
-                transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none',
-              }}
-            />
-          </button>
+            >
+              <span
+                style={{
+                  width: '18px',
+                  height: '2px',
+                  backgroundColor: 'var(--color-text-primary)',
+                  transition: 'all 0.3s ease',
+                  transform: isMobileMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none',
+                }}
+              />
+              <span
+                style={{
+                  width: '18px',
+                  height: '2px',
+                  backgroundColor: 'var(--color-text-primary)',
+                  transition: 'all 0.3s ease',
+                  opacity: isMobileMenuOpen ? 0 : 1,
+                }}
+              />
+              <span
+                style={{
+                  width: '18px',
+                  height: '2px',
+                  backgroundColor: 'var(--color-text-primary)',
+                  transition: 'all 0.3s ease',
+                  transform: isMobileMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none',
+                }}
+              />
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
+          id="mobile-nav-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('nav.mobileNav')}
           style={{
             position: 'fixed',
             inset: 0,
             zIndex: 999,
-            backgroundColor: 'var(--color-bg-primary)',
+            backgroundColor: 'rgba(9, 10, 15, 0.98)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
             padding: '2rem',
+            animation: 'fadeInUp 0.25s ease-out',
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                style={{
-                  fontFamily: 'var(--font-heading)',
-                  fontSize: '1.75rem',
-                  fontWeight: 600,
-                  color: 'var(--color-text-primary)',
-                  textDecoration: 'none',
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.75rem', width: '100%', maxWidth: '300px' }}>
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.id;
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  aria-current={isActive ? 'page' : undefined}
+                  style={{
+                    fontFamily: isRtl ? 'var(--font-arabic-heading)' : 'var(--font-heading)',
+                    fontSize: '1.5rem',
+                    fontWeight: isActive ? 700 : 600,
+                    color: isActive ? 'var(--color-accent)' : 'var(--color-text-primary)',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  {isActive && <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-accent)' }} />}
+                  <span>{link.label}</span>
+                </a>
+              );
+            })}
+
+            <div style={{ marginTop: '0.75rem' }}>
+              <LanguageToggle variant="button" />
+            </div>
+
             <a
               href="#contact"
               onClick={scrollToContact}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '8px',
-                padding: '12px 24px',
+                width: '100%',
+                padding: '14px 24px',
                 fontSize: '1rem',
                 fontWeight: 600,
                 color: 'var(--color-bg-primary)',
@@ -216,10 +281,11 @@ export function Navbar() {
                 borderRadius: '6px',
                 textDecoration: 'none',
                 marginTop: '1rem',
+                boxShadow: '0 4px 20px rgba(0, 210, 255, 0.25)',
               }}
             >
-              Start a Project
-              <ArrowUpRight size={16} />
+              <span>{t('nav.startProject')}</span>
+              <ArrowUpRight size={16} className="rtl-arrow-up-right" />
             </a>
           </div>
         </div>
@@ -229,7 +295,7 @@ export function Navbar() {
       <style>{`
         @media (max-width: 768px) {
           .desktop-nav { display: none !important; }
-          .mobile-toggle { display: flex !important; }
+          .mobile-controls { display: flex !important; }
         }
       `}</style>
     </>

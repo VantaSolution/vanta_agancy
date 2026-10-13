@@ -1,35 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { dashboardAPI, projectsAPI, messagesAPI } from '@/api/endpoints';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/i18n';
+import { formatNumber } from '@/utils/formatters';
 import { FolderKanban, Eye, FileText, Mail, ArrowUpRight } from 'lucide-react';
 import type { DashboardStats, Project, ContactMessage } from '@/types';
 
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { t, decode, language } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentProjects, setRecentProjects] = useState<Project[]>([]);
   const [recentMessages, setRecentMessages] = useState<ContactMessage[]>([]);
 
   useEffect(() => {
-    dashboardAPI.getStats().then(setStats);
-    projectsAPI.list().then((p) => setRecentProjects(p.slice(0, 5)));
-    messagesAPI.list().then((m) => setRecentMessages(m.slice(0, 5)));
+    dashboardAPI.getStats().then(setStats).catch(() => {});
+    projectsAPI.list().then((p) => setRecentProjects(p.slice(0, 5))).catch(() => {});
+    messagesAPI.list().then((m) => setRecentMessages(m.slice(0, 5))).catch(() => {});
   }, []);
 
   const statCards = stats ? [
-    { label: 'Total Projects', value: stats.totalProjects, icon: FolderKanban, color: 'var(--color-accent)' },
-    { label: 'Published', value: stats.publishedProjects, icon: Eye, color: 'var(--color-status-success)' },
-    { label: 'Drafts', value: stats.draftProjects, icon: FileText, color: 'var(--color-status-warning)' },
-    { label: 'Messages', value: stats.totalMessages, icon: Mail, color: 'var(--color-status-info)', badge: stats.unreadMessages > 0 ? `${stats.unreadMessages} new` : undefined },
+    {
+      label: t('admin.dashboard.totalProjects'),
+      value: formatNumber(stats.totalProjects, language),
+      icon: FolderKanban,
+      color: 'var(--color-accent)',
+    },
+    {
+      label: t('admin.dashboard.published'),
+      value: formatNumber(stats.publishedProjects, language),
+      icon: Eye,
+      color: 'var(--color-status-success)',
+    },
+    {
+      label: t('admin.dashboard.drafts'),
+      value: formatNumber(stats.draftProjects, language),
+      icon: FileText,
+      color: 'var(--color-status-warning)',
+    },
+    {
+      label: t('admin.dashboard.messages'),
+      value: formatNumber(stats.totalMessages, language),
+      icon: Mail,
+      color: 'var(--color-status-info)',
+      badge: stats.unreadMessages > 0 ? `${formatNumber(stats.unreadMessages, language)} ${t('admin.dashboard.newBadge')}` : undefined,
+    },
   ] : [];
 
   return (
     <div>
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.375rem' }}>
-          Dashboard
+          {t('admin.dashboard.title')}
         </h1>
-        <p className="text-body-sm">Overview of your agency website</p>
+        <p className="text-body-sm">{t('admin.dashboard.subtitle')}</p>
       </div>
 
       {/* Stats Grid */}
@@ -53,17 +77,25 @@ export function DashboardPage() {
       </div>
 
       {/* Recent content */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div className="admin-content-grid">
         {/* Recent Projects */}
         <div className="admin-card" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 600 }}>Recent Projects</h2>
-            <button onClick={() => navigate('/admin/projects')} style={{ fontSize: '0.75rem', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              View all <ArrowUpRight size={12} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 600 }}>
+              {t('admin.dashboard.recentProjects')}
+            </h2>
+            <button
+              onClick={() => navigate('/admin/projects')}
+              style={{ fontSize: '0.75rem', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              <span>{t('common.viewAll')}</span>
+              <ArrowUpRight size={12} className="rtl-arrow-up-right" />
             </button>
           </div>
           {recentProjects.length === 0 ? (
-            <p className="text-body-sm" style={{ textAlign: 'center', padding: '2rem 0' }}>No projects yet</p>
+            <p className="text-body-sm" style={{ textAlign: 'center', padding: '2rem 0' }}>
+              {t('admin.dashboard.noProjectsYet')}
+            </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {recentProjects.map((project) => (
@@ -82,18 +114,20 @@ export function DashboardPage() {
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-bg-elevated)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span style={{ fontSize: '0.875rem', color: 'var(--color-text-primary)' }}>{project.name}</span>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--color-text-primary)' }}>
+                    {decode(project.name)}
+                  </span>
                   <span
                     style={{
                       padding: '2px 8px',
                       fontSize: '0.625rem',
                       fontWeight: 500,
                       borderRadius: '4px',
-                      backgroundColor: project.isPublished ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                      backgroundColor: project.isPublished ? 'var(--color-status-success-muted)' : 'var(--color-status-warning-muted)',
                       color: project.isPublished ? 'var(--color-status-success)' : 'var(--color-status-warning)',
                     }}
                   >
-                    {project.isPublished ? 'Published' : 'Draft'}
+                    {project.isPublished ? t('status.published') : t('status.draft')}
                   </span>
                 </div>
               ))}
@@ -104,13 +138,21 @@ export function DashboardPage() {
         {/* Recent Messages */}
         <div className="admin-card" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 600 }}>Recent Messages</h2>
-            <button onClick={() => navigate('/admin/messages')} style={{ fontSize: '0.75rem', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              View all <ArrowUpRight size={12} />
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 600 }}>
+              {t('admin.dashboard.recentMessages')}
+            </h2>
+            <button
+              onClick={() => navigate('/admin/messages')}
+              style={{ fontSize: '0.75rem', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              <span>{t('common.viewAll')}</span>
+              <ArrowUpRight size={12} className="rtl-arrow-up-right" />
             </button>
           </div>
           {recentMessages.length === 0 ? (
-            <p className="text-body-sm" style={{ textAlign: 'center', padding: '2rem 0' }}>No messages yet</p>
+            <p className="text-body-sm" style={{ textAlign: 'center', padding: '2rem 0' }}>
+              {t('admin.dashboard.noMessagesYet')}
+            </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {recentMessages.map((msg) => (
@@ -133,9 +175,11 @@ export function DashboardPage() {
                     <span style={{ fontSize: '0.875rem', color: 'var(--color-text-primary)', fontWeight: msg.status === 'new' ? 600 : 400 }}>
                       {msg.name}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-dim)', marginLeft: '8px' }}>
-                      {msg.projectType}
-                    </span>
+                    {msg.projectType && (
+                      <span style={{ fontSize: '0.75rem', color: 'var(--color-text-dim)', marginInlineStart: '8px' }}>
+                        {decode(msg.projectType)}
+                      </span>
+                    )}
                   </div>
                   {msg.status === 'new' && (
                     <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--color-accent)' }} />
@@ -148,9 +192,18 @@ export function DashboardPage() {
       </div>
 
       <style>{`
+        .admin-content-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 1.5rem;
+          min-width: 0;
+        }
+        .admin-content-grid > div {
+          min-width: 0;
+        }
         @media (max-width: 768px) {
-          div[style*="grid-template-columns: 1fr 1fr"] {
-            grid-template-columns: 1fr !important;
+          .admin-content-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
           }
         }
       `}</style>

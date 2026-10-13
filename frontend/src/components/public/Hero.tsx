@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { useWebsite } from '@/context/WebsiteContext';
+import { useTranslation } from '@/i18n';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 
 // ─── Canvas Animation: Digital System ───
@@ -64,7 +65,7 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.strokeStyle = `rgba(232, 255, 74, ${opacity})`;
+          ctx.strokeStyle = `rgba(0, 210, 255, ${opacity})`;
           ctx.lineWidth = 0.6;
           ctx.stroke();
         }
@@ -75,7 +76,7 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     nodes.forEach((node) => {
       ctx.beginPath();
       ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(232, 255, 74, 0.7)';
+      ctx.fillStyle = 'rgba(0, 210, 255, 0.75)';
       ctx.fill();
     });
 
@@ -108,13 +109,13 @@ export function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useDigitalCanvas(canvasRef);
   const { content } = useWebsite();
+  const { t, decode, isRtl } = useTranslation();
 
-  const heroContent = content?.hero || {
-    headline: "WE BUILD DIGITAL EXPERIENCES\nTHAT MOVE BUSINESSES FORWARD.",
-    description: "We design and develop fast, modern websites and digital products for businesses that want to stand out, perform better, and grow.",
-    primaryCta: "Start a Project",
-    secondaryCta: "View Our Work",
-  };
+  // If content has bilingual text or is default, decode properly or fallback to localized translation
+  const headline = content?.hero?.headline ? decode(content.hero.headline) : t('hero.headline');
+  const description = content?.hero?.description ? decode(content.hero.description) : t('hero.description');
+  const primaryCta = content?.hero?.primaryCta ? decode(content.hero.primaryCta) : t('hero.primaryCta');
+  const secondaryCta = content?.hero?.secondaryCta ? decode(content.hero.secondaryCta) : t('hero.secondaryCta');
 
   const scrollToContact = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -145,7 +146,7 @@ export function Hero() {
         style={{
           position: 'absolute',
           top: 0,
-          right: 0,
+          insetInlineEnd: 0,
           width: '60%',
           height: '100%',
           opacity: 0.6,
@@ -158,7 +159,9 @@ export function Hero() {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(135deg, var(--color-bg-primary) 40%, transparent 100%)',
+          background: isRtl
+            ? 'linear-gradient(225deg, var(--color-bg-primary) 40%, transparent 100%)'
+            : 'linear-gradient(135deg, var(--color-bg-primary) 40%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
@@ -168,8 +171,8 @@ export function Hero() {
         style={{
           position: 'absolute',
           top: 0,
-          left: 0,
-          right: 0,
+          insetInlineStart: 0,
+          insetInlineEnd: 0,
           height: '1px',
           background: 'linear-gradient(90deg, transparent, var(--color-accent), transparent)',
           opacity: 0.3,
@@ -183,16 +186,17 @@ export function Hero() {
             className="hero-reveal hero-reveal-delay-1"
             style={{
               display: 'flex',
-              gap: '2rem',
+              gap: '1.5rem',
               marginBottom: '2rem',
               flexWrap: 'wrap',
+              alignItems: 'center',
             }}
           >
-            <span className="text-label-accent">DIGITAL STUDIO</span>
+            <span className="text-label-accent">{t('hero.digitalStudio')}</span>
             <span className="text-label" style={{ color: 'var(--color-text-dim)' }}>—</span>
-            <span className="text-label">WEB DEVELOPMENT</span>
+            <span className="text-label">{t('hero.webDevelopment')}</span>
             <span className="text-label" style={{ color: 'var(--color-text-dim)' }}>—</span>
-            <span className="text-label">EST. 2026</span>
+            <span className="text-label">{t('hero.established')}</span>
           </div>
 
           {/* Dynamic Headline */}
@@ -204,18 +208,18 @@ export function Hero() {
               whiteSpace: 'pre-line',
             }}
           >
-            {heroContent.headline}
+            {headline}
           </h1>
 
           {/* Dynamic Description */}
           <p
             className="text-body-lg hero-reveal hero-reveal-delay-3"
             style={{
-              maxWidth: '520px',
+              maxWidth: '540px',
               marginBottom: '2.5rem',
             }}
           >
-            {heroContent.description}
+            {description}
           </p>
 
           {/* CTAs */}
@@ -238,12 +242,11 @@ export function Hero() {
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'all 0.25s ease',
-                fontFamily: 'var(--font-body)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--color-accent-hover)';
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 30px rgba(232, 255, 74, 0.2)';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(0, 210, 255, 0.25)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--color-accent)';
@@ -251,8 +254,8 @@ export function Hero() {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              {heroContent.primaryCta}
-              <ArrowUpRight size={16} strokeWidth={2.5} />
+              <span>{primaryCta}</span>
+              <ArrowUpRight size={16} strokeWidth={2.5} className="rtl-arrow-up-right" />
             </button>
 
             <button
@@ -270,7 +273,6 @@ export function Hero() {
                 border: '1px solid var(--color-border-strong)',
                 cursor: 'pointer',
                 transition: 'all 0.25s ease',
-                fontFamily: 'var(--font-body)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'var(--color-accent)';
@@ -281,7 +283,7 @@ export function Hero() {
                 e.currentTarget.style.color = 'var(--color-text-primary)';
               }}
             >
-              {heroContent.secondaryCta}
+              <span>{secondaryCta}</span>
               <ChevronDown size={16} />
             </button>
           </div>
@@ -293,11 +295,14 @@ export function Hero() {
           style={{
             position: 'absolute',
             bottom: '2rem',
-            left: 'clamp(1.5rem, 4vw, 4rem)',
-            right: 'clamp(1.5rem, 4vw, 4rem)',
+            insetInlineStart: 'clamp(1.5rem, 4vw, 4rem)',
+            insetInlineEnd: 'clamp(1.5rem, 4vw, 4rem)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.75rem 1.5rem',
+            pointerEvents: 'none',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -312,12 +317,12 @@ export function Hero() {
               }}
             />
             <span className="text-mono" style={{ color: 'var(--color-text-muted)', fontSize: '0.6875rem' }}>
-              AVAILABLE FOR PROJECTS
+              {t('hero.availableForProjects')}
             </span>
           </div>
 
           <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.6875rem' }}>
-            VANTA.STUDIO — V2.0
+            {t('hero.version')}
           </span>
         </div>
       </div>

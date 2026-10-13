@@ -1,9 +1,12 @@
 import React from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { processSteps } from '@/data/process';
+import { useTranslation } from '@/i18n';
 
 export function Process() {
   const ref = useScrollReveal(0.1);
+  const { t, dict } = useTranslation();
+
+  const processSteps = dict.process.steps;
 
   return (
     <section id="process" className="section-padding" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -11,9 +14,9 @@ export function Process() {
         {/* Header */}
         <div className="reveal" style={{ textAlign: 'center', marginBottom: '5rem' }}>
           <span className="text-label-accent" style={{ display: 'block', marginBottom: '1rem' }}>
-            // PROCESS
+            {t('process.tag')}
           </span>
-          <h2 className="text-section-title">FROM IDEA TO LAUNCH</h2>
+          <h2 className="text-section-title">{t('process.heading')}</h2>
         </div>
 
         {/* Desktop: Horizontal Timeline */}
@@ -23,8 +26,8 @@ export function Process() {
             style={{
               position: 'absolute',
               top: '24px',
-              left: '12.5%',
-              right: '12.5%',
+              insetInlineStart: '12.5%',
+              insetInlineEnd: '12.5%',
               height: '1px',
               backgroundColor: 'var(--color-border-default)',
             }}
@@ -105,12 +108,12 @@ export function Process() {
 
         {/* Mobile: Vertical Timeline */}
         <div className="process-mobile reveal reveal-delay-2">
-          <div style={{ position: 'relative', paddingLeft: '3rem' }}>
+          <div style={{ position: 'relative', paddingInlineStart: '3rem' }}>
             {/* Vertical line */}
             <div
               style={{
                 position: 'absolute',
-                left: '15px',
+                insetInlineStart: '15px',
                 top: '24px',
                 bottom: '24px',
                 width: '1px',
@@ -130,7 +133,7 @@ export function Process() {
                 <div
                   style={{
                     position: 'absolute',
-                    left: '-3rem',
+                    insetInlineStart: '-3rem',
                     top: '0',
                     width: '32px',
                     height: '32px',

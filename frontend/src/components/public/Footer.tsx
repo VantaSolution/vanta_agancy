@@ -1,21 +1,27 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useWebsite } from '@/context/WebsiteContext';
-import { Instagram, Linkedin, Github } from 'lucide-react';
-
-const footerNav = [
-  { label: 'Services', href: '#services' },
-  { label: 'Work', href: '#work' },
-  { label: 'Process', href: '#process' },
-  { label: 'About', href: '#about' },
-  { label: 'Contact', href: '#contact' },
-];
+import { useTranslation } from '@/i18n';
+import { Instagram, Linkedin, Github, ArrowUp } from 'lucide-react';
 
 export function Footer() {
   const { content, settings } = useWebsite();
-  const agencyName = settings?.general?.agencyName || 'VANTA';
+  const { t, decode, isRtl } = useTranslation();
+
+  const rawAgencyName = settings?.general?.agencyName || 'VANTA';
+  const agencyName = decode(rawAgencyName) || 'VANTA';
   const agencyEmail = settings?.general?.email || content?.contact?.email || 'hello@vanta.studio';
-  const agencyLocation = settings?.general?.location || content?.contact?.location || 'Remote — Worldwide';
+  const rawLocation = settings?.general?.location || content?.contact?.location;
+  const agencyLocation = decode(rawLocation) || t('contact.locationValue');
   const socialLinks = settings?.social || content?.contact?.socialLinks || { instagram: '#', linkedin: '#', github: '#', twitter: '#' };
+
+  const footerNav = [
+    { label: t('nav.services'), href: '#services' },
+    { label: t('nav.work'), href: '#work' },
+    { label: t('nav.process'), href: '#process' },
+    { label: t('nav.about'), href: '#about' },
+    { label: t('nav.contact'), href: '#contact' },
+  ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -32,24 +38,17 @@ export function Footer() {
     >
       <div className="container-wide">
         {/* Main footer content */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.5fr 1fr 1fr 1fr',
-            gap: 'clamp(2rem, 4vw, 3rem)',
-            marginBottom: '4rem',
-          }}
-        >
+        <div className="footer-grid">
           {/* Brand */}
           <div>
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               style={{
-                fontFamily: 'var(--font-heading)',
+                fontFamily: isRtl ? 'var(--font-arabic-heading)' : 'var(--font-heading)',
                 fontSize: '1.5rem',
                 fontWeight: 700,
-                letterSpacing: '0.08em',
+                letterSpacing: isRtl ? 'normal' : '0.08em',
                 color: 'var(--color-text-primary)',
                 textDecoration: 'none',
                 display: 'inline-block',
@@ -60,7 +59,7 @@ export function Footer() {
               {agencyName}<span style={{ color: 'var(--color-accent)' }}>.</span>
             </a>
             <p className="text-body-sm" style={{ maxWidth: '300px', marginBottom: '1.5rem' }}>
-              Digital studio engineering fast, modern websites and applications for forward-thinking businesses.
+              {t('footer.tagline')}
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
               {socialLinks.instagram && (
@@ -108,7 +107,7 @@ export function Footer() {
           {/* Navigation Links */}
           <div>
             <span className="text-label" style={{ display: 'block', marginBottom: '1.25rem' }}>
-              NAVIGATION
+              {t('footer.navigation')}
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {footerNav.map((link) => (
@@ -134,7 +133,7 @@ export function Footer() {
           {/* Direct Contact */}
           <div>
             <span className="text-label" style={{ display: 'block', marginBottom: '1.25rem' }}>
-              DIRECT CONTACT
+              {t('contact.infoTitle')}
             </span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <a
@@ -144,6 +143,10 @@ export function Footer() {
                   color: 'var(--color-text-secondary)',
                   textDecoration: 'none',
                   transition: 'color 0.2s ease',
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
+                  direction: 'ltr',
+                  display: 'inline-block',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
@@ -156,12 +159,12 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Availability */}
+          {/* Availability & Back to top */}
           <div>
             <span className="text-label" style={{ display: 'block', marginBottom: '1.25rem' }}>
-              STATUS
+              {t('common.status')}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
               <span
                 className="pulse-dot"
                 style={{
@@ -170,15 +173,46 @@ export function Footer() {
                   borderRadius: '50%',
                   backgroundColor: 'var(--color-accent)',
                   display: 'inline-block',
+                  flexShrink: 0,
                 }}
               />
               <span style={{ fontSize: '0.875rem', color: 'var(--color-text-primary)', fontWeight: 500 }}>
-                Taking on new projects
+                {t('hero.availableForProjects')}
               </span>
             </div>
-            <p className="text-body-sm">
-              Estimated project start: within 1-2 weeks.
+            <p className="text-body-sm" style={{ marginBottom: '1.25rem' }}>
+              {t('hero.version')}
             </p>
+
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 14px',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                backgroundColor: 'var(--color-bg-elevated)',
+                border: '1px solid var(--color-border-subtle)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-accent)';
+                e.currentTarget.style.borderColor = 'var(--color-accent)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+              }}
+              aria-label={isRtl ? 'العودة إلى أعلى الصفحة' : 'Back to top'}
+            >
+              <span>{isRtl ? 'إلى الأعلى' : 'Back to top'}</span>
+              <ArrowUp size={14} />
+            </button>
           </div>
         </div>
 
@@ -194,15 +228,52 @@ export function Footer() {
             gap: '1rem',
           }}
         >
-          <span className="text-mono" style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
-            © {new Date().getFullYear()} {agencyName}. ALL RIGHTS RESERVED.
+          <span className="text-mono" style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', overflowWrap: 'anywhere' }}>
+            © <span dir="ltr" style={{ unicodeBidi: 'isolate' }}>{new Date().getFullYear()}</span> {agencyName}. {t('footer.rightsReserved')}
           </span>
 
-          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem' }}>
-            DESIGNED & ENGINEERED FOR HIGH PERFORMANCE
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+            <Link
+              to="/admin/login"
+              style={{
+                color: 'var(--color-text-dim)',
+                fontSize: '0.75rem',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-dim)')}
+            >
+              {isRtl ? 'بوابة الإدارة' : 'Staff Portal'}
+            </Link>
+            <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem', overflowWrap: 'anywhere' }}>
+              {t('footer.designedAndBuilt')}
+            </span>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        .footer-grid {
+          display: grid;
+          grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr));
+          gap: clamp(2rem, 4vw, 3rem);
+          margin-bottom: 4rem;
+        }
+        .footer-grid > div {
+          min-width: 0;
+        }
+        @media (max-width: 1024px) {
+          .footer-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .footer-grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }

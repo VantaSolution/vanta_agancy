@@ -16,7 +16,7 @@ export function HomePage() {
   return (
     <>
       <Navbar />
-      <main>
+      <main id="main-content">
         <Hero />
         <Intro />
         <Services />

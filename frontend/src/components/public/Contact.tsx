@@ -1,28 +1,10 @@
 import React, { useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useWebsite } from '@/context/WebsiteContext';
+import { useTranslation, getErrorMessage } from '@/i18n';
 import { messagesAPI } from '@/api/endpoints';
-import { Send, Mail, MapPin, Instagram, Linkedin, Github } from 'lucide-react';
+import { Send, Mail, MapPin, Instagram, Linkedin, Github, AlertCircle, Loader2 } from 'lucide-react';
 import type { ContactFormData } from '@/types';
-
-const projectTypes = [
-  'Business Website',
-  'Landing Page',
-  'E-Commerce',
-  'Booking System',
-  'Custom Web App',
-  'Website Redesign',
-  'Maintenance & Hosting',
-  'Other',
-];
-
-const budgetRanges = [
-  'Under $2,000',
-  '$2,000 — $5,000',
-  '$5,000 — $10,000',
-  '$10,000 — $25,000',
-  '$25,000+',
-  'Not sure yet',
-];
 
 interface FormErrors {
   [key: string]: string;
@@ -30,6 +12,9 @@ interface FormErrors {
 
 export function Contact() {
   const ref = useScrollReveal(0.1);
+  const { settings, content } = useWebsite();
+  const { t, dict, decode, isRtl } = useTranslation();
+
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -41,19 +26,44 @@ export function Contact() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  const agencyEmail = settings?.general?.email || content?.contact?.email || 'hello@vanta.studio';
+  const agencyLocation = decode(settings?.general?.location || content?.contact?.location) || t('contact.locationValue');
+
+  const projectTypes = dict.contact.projectTypes;
+  const budgetRanges = dict.contact.budgetRanges;
+
+  const validateField = (field: keyof ContactFormData, value: string): string | null => {
+    if (field === 'name' && !value.trim()) return t('validation.nameRequired');
+    if (field === 'email') {
+      if (!value.trim()) return t('validation.emailRequired');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t('validation.emailInvalid');
+    }
+    if (field === 'message' && !value.trim()) return t('validation.messageRequired');
+    return null;
+  };
+
+  const handleBlur = (field: keyof ContactFormData) => {
+    const errorMsg = validateField(field, formData[field] || '');
+    if (errorMsg) {
+      setErrors((prev) => ({ ...prev, [field]: errorMsg }));
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email address';
-    if (!formData.message.trim()) newErrors.message = 'Please describe your project';
+    if (!formData.name.trim()) newErrors.name = t('validation.nameRequired');
+    if (!formData.email.trim()) newErrors.email = t('validation.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = t('validation.emailInvalid');
+    if (!formData.message.trim()) newErrors.message = t('validation.messageRequired');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionError(null);
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -61,8 +71,10 @@ export function Contact() {
       await messagesAPI.submit(formData);
       setIsSubmitted(true);
       setFormData({ name: '', email: '', company: '', projectType: '', budgetRange: '', message: '' });
-    } catch (err) {
-      console.error('Failed to submit:', err);
+      setErrors({});
+    } catch (err: any) {
+      console.error('Failed to submit message:', err);
+      setSubmissionError(getErrorMessage(err, 'errors.generic', t));
     } finally {
       setIsSubmitting(false);
     }
@@ -72,6 +84,9 @@ export function Contact() {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
+    }
+    if (submissionError) {
+      setSubmissionError(null);
     }
   };
 
@@ -83,7 +98,7 @@ export function Contact() {
     padding: '12px 16px',
     color: 'var(--color-text-primary)',
     fontSize: '0.9375rem',
-    fontFamily: 'var(--font-body)',
+    fontFamily: 'inherit',
     outline: 'none',
     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   });
@@ -93,8 +108,8 @@ export function Contact() {
     marginBottom: '6px',
     fontSize: '0.75rem',
     fontWeight: 500,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase' as const,
+    letterSpacing: isRtl ? '0.02em' : '0.08em',
+    textTransform: isRtl ? 'none' : ('uppercase' as const),
     color: 'var(--color-text-muted)',
   };
 
@@ -104,20 +119,15 @@ export function Contact() {
         {/* Header */}
         <div className="reveal" style={{ marginBottom: '3rem' }}>
           <span className="text-label-accent" style={{ display: 'block', marginBottom: '1rem' }}>
-            // CONTACT
+            {t('contact.tag')}
           </span>
-          <h2 className="text-section-title">START A PROJECT</h2>
+          <h2 className="text-section-title">{t('contact.heading')}</h2>
+          <p className="text-body" style={{ marginTop: '0.75rem', maxWidth: '550px' }}>
+            {t('contact.subtitle')}
+          </p>
         </div>
 
-        <div
-          className="reveal reveal-delay-2"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.3fr 1fr',
-            gap: 'clamp(3rem, 6vw, 5rem)',
-            alignItems: 'start',
-          }}
-        >
+        <div className="contact-grid reveal reveal-delay-2">
           {/* Form */}
           <div>
             {isSubmitted ? (
@@ -139,10 +149,10 @@ export function Contact() {
                     marginBottom: '0.75rem',
                   }}
                 >
-                  MESSAGE SENT
+                  {t('contact.successTitle')}
                 </h3>
-                <p className="text-body">
-                  Thank you! We'll review your project and get back to you within 24 hours.
+                <p className="text-body" style={{ maxWidth: '500px', margin: '0 auto' }}>
+                  {t('contact.successDesc')}
                 </p>
                 <button
                   onClick={() => setIsSubmitted(false)}
@@ -156,111 +166,164 @@ export function Contact() {
                     border: '1px solid var(--color-border-default)',
                     borderRadius: '6px',
                     cursor: 'pointer',
-                    fontFamily: 'var(--font-body)',
                   }}
                 >
-                  Send another message
+                  {t('contact.sendAnother')}
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+              <form onSubmit={handleSubmit} noValidate>
+                {/* Submission Error Banner */}
+                {submissionError && (
+                  <div
+                    role="alert"
+                    aria-live="polite"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 16px',
+                      marginBottom: '1.5rem',
+                      borderRadius: '6px',
+                      backgroundColor: 'var(--color-status-error-muted)',
+                      border: '1px solid var(--color-status-error)',
+                      color: 'var(--color-text-primary)',
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    <AlertCircle size={18} style={{ color: 'var(--color-status-error)', flexShrink: 0 }} />
+                    <span style={{ flex: 1 }}>{submissionError}</span>
+                  </div>
+                )}
+
+                <div className="form-row-2col">
                   <div>
-                    <label htmlFor="contact-name" style={labelStyle}>Name *</label>
+                    <label htmlFor="contact-name" style={labelStyle}>
+                      {t('contact.nameLabel')} <span aria-hidden="true" style={{ color: 'var(--color-accent)' }}>*</span>
+                    </label>
                     <input
                       id="contact-name"
-                      aria-label="Name"
+                      aria-label={t('contact.nameLabel')}
+                      aria-required="true"
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? 'contact-name-error' : undefined}
                       type="text"
                       value={formData.name}
                       onChange={(e) => handleChange('name', e.target.value)}
-                      placeholder="Your name"
+                      placeholder={t('contact.namePlaceholder')}
                       style={inputStyle(!!errors.name)}
                       onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-muted)'; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = errors.name ? 'var(--color-status-error)' : 'var(--color-border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
+                      onBlur={(e) => {
+                        handleBlur('name');
+                        e.currentTarget.style.borderColor = errors.name ? 'var(--color-status-error)' : 'var(--color-border-subtle)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
                     />
-                    {errors.name && <span style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>{errors.name}</span>}
+                    {errors.name && (
+                      <span id="contact-name-error" role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>
+                        {errors.name}
+                      </span>
+                    )}
                   </div>
                   <div>
-                    <label htmlFor="contact-email" style={labelStyle}>Email *</label>
+                    <label htmlFor="contact-email" style={labelStyle}>
+                      {t('contact.emailLabel')} <span aria-hidden="true" style={{ color: 'var(--color-accent)' }}>*</span>
+                    </label>
                     <input
                       id="contact-email"
-                      aria-label="Email"
+                      aria-label={t('contact.emailLabel')}
+                      aria-required="true"
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? 'contact-email-error' : undefined}
                       type="email"
+                      dir="ltr"
                       value={formData.email}
                       onChange={(e) => handleChange('email', e.target.value)}
-                      placeholder="you@company.com"
-                      style={inputStyle(!!errors.email)}
+                      placeholder={t('contact.emailPlaceholder')}
+                      style={{ ...inputStyle(!!errors.email), textAlign: isRtl ? 'right' : 'left' }}
                       onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-muted)'; }}
-                      onBlur={(e) => { e.currentTarget.style.borderColor = errors.email ? 'var(--color-status-error)' : 'var(--color-border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
+                      onBlur={(e) => {
+                        handleBlur('email');
+                        e.currentTarget.style.borderColor = errors.email ? 'var(--color-status-error)' : 'var(--color-border-subtle)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
                     />
-                    {errors.email && <span style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>{errors.email}</span>}
+                    {errors.email && (
+                      <span id="contact-email-error" role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>
+                        {errors.email}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <label htmlFor="contact-company" style={labelStyle}>Company</label>
+                  <label htmlFor="contact-company" style={labelStyle}>{t('contact.companyLabel')}</label>
                   <input
                     id="contact-company"
-                    aria-label="Company"
+                    aria-label={t('contact.companyLabel')}
                     type="text"
                     value={formData.company}
                     onChange={(e) => handleChange('company', e.target.value)}
-                    placeholder="Company name (optional)"
+                    placeholder={t('contact.companyPlaceholder')}
                     style={inputStyle(false)}
                     onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-muted)'; }}
                     onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--color-border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
                   />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="form-row-2col">
                   <div>
-                    <label htmlFor="project-type" style={labelStyle}>Project Type</label>
+                    <label htmlFor="project-type" style={labelStyle}>{t('contact.projectTypeLabel')}</label>
                     <select
                       id="project-type"
-                      aria-label="Project Type"
+                      aria-label={t('contact.projectTypeLabel')}
                       value={formData.projectType}
                       onChange={(e) => handleChange('projectType', e.target.value)}
                       style={{
                         ...inputStyle(false),
                         appearance: 'none',
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                         backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 14px center',
-                        paddingRight: '36px',
+                        backgroundPosition: isRtl ? 'left 14px center' : 'right 14px center',
+                        paddingInlineEnd: '36px',
                       }}
                       onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-muted)'; }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--color-border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
                     >
-                      <option value="" style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-muted)' }}>Select type</option>
+                      <option value="" style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-muted)' }}>
+                        {t('contact.projectTypePlaceholder')}
+                      </option>
                       {projectTypes.map((type) => (
-                        <option key={type} value={type} style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}>
-                          {type}
+                        <option key={type.id} value={type.id} style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}>
+                          {type.label}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="budget-range" style={labelStyle}>Budget Range</label>
+                    <label htmlFor="budget-range" style={labelStyle}>{t('contact.budgetRangeLabel')}</label>
                     <select
                       id="budget-range"
-                      aria-label="Budget Range"
+                      aria-label={t('contact.budgetRangeLabel')}
                       value={formData.budgetRange}
                       onChange={(e) => handleChange('budgetRange', e.target.value)}
                       style={{
                         ...inputStyle(false),
                         appearance: 'none',
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
                         backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 14px center',
-                        paddingRight: '36px',
+                        backgroundPosition: isRtl ? 'left 14px center' : 'right 14px center',
+                        paddingInlineEnd: '36px',
                       }}
                       onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-muted)'; }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--color-border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
                     >
-                      <option value="" style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-muted)' }}>Select budget</option>
+                      <option value="" style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-muted)' }}>
+                        {t('contact.budgetRangePlaceholder')}
+                      </option>
                       {budgetRanges.map((range) => (
-                        <option key={range} value={range} style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}>
-                          {range}
+                        <option key={range.id} value={range.id} style={{ background: 'var(--color-bg-elevated)', color: 'var(--color-text-primary)' }}>
+                          {range.label}
                         </option>
                       ))}
                     </select>
@@ -268,13 +331,18 @@ export function Contact() {
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label htmlFor="contact-message" style={labelStyle}>Project Details *</label>
+                  <label htmlFor="contact-message" style={labelStyle}>
+                    {t('contact.messageLabel')} <span aria-hidden="true" style={{ color: 'var(--color-accent)' }}>*</span>
+                  </label>
                   <textarea
                     id="contact-message"
-                    aria-label="Project Details"
+                    aria-label={t('contact.messageLabel')}
+                    aria-required="true"
+                    aria-invalid={!!errors.message}
+                    aria-describedby={errors.message ? 'contact-message-error' : undefined}
                     value={formData.message}
                     onChange={(e) => handleChange('message', e.target.value)}
-                    placeholder="Tell us about your project, goals, timeline, and any specific requirements..."
+                    placeholder={t('contact.messagePlaceholder')}
                     rows={5}
                     style={{
                       ...inputStyle(!!errors.message),
@@ -282,14 +350,23 @@ export function Contact() {
                       minHeight: '120px',
                     }}
                     onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent)'; e.currentTarget.style.boxShadow = '0 0 0 3px var(--color-accent-muted)'; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = errors.message ? 'var(--color-status-error)' : 'var(--color-border-subtle)'; e.currentTarget.style.boxShadow = 'none'; }}
+                    onBlur={(e) => {
+                      handleBlur('message');
+                      e.currentTarget.style.borderColor = errors.message ? 'var(--color-status-error)' : 'var(--color-border-subtle)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   />
-                  {errors.message && <span style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>{errors.message}</span>}
+                  {errors.message && (
+                    <span id="contact-message-error" role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-status-error)', marginTop: '4px', display: 'block' }}>
+                      {errors.message}
+                    </span>
+                  )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
+                  aria-busy={isSubmitting}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -303,15 +380,22 @@ export function Contact() {
                     border: 'none',
                     cursor: isSubmitting ? 'not-allowed' : 'pointer',
                     transition: 'all 0.25s ease',
-                    fontFamily: 'var(--font-body)',
-                    letterSpacing: '0.04em',
-                    textTransform: 'uppercase' as const,
+                    letterSpacing: isRtl ? 'normal' : '0.04em',
                   }}
                   onMouseEnter={(e) => { if (!isSubmitting) { e.currentTarget.style.backgroundColor = 'var(--color-accent-hover)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = isSubmitting ? 'var(--color-text-dim)' : 'var(--color-accent)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  {isSubmitting ? 'Sending...' : 'SEND PROJECT REQUEST'}
-                  <Send size={16} strokeWidth={2.5} />
+                  {isSubmitting ? (
+                    <>
+                      <span>{t('contact.submitting')}</span>
+                      <Loader2 size={16} strokeWidth={2.5} className="animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      <span>{t('contact.submitButton')}</span>
+                      <Send size={16} strokeWidth={2.5} className="rtl-flip" />
+                    </>
+                  )}
                 </button>
               </form>
             )}
@@ -320,9 +404,11 @@ export function Contact() {
           {/* Contact Info */}
           <div style={{ paddingTop: '0.5rem' }}>
             <div style={{ marginBottom: '2.5rem' }}>
-              <span className="text-label" style={{ display: 'block', marginBottom: '1rem' }}>EMAIL</span>
+              <span className="text-label" style={{ display: 'block', marginBottom: '1rem' }}>
+                {t('contact.directEmail')}
+              </span>
               <a
-                href="mailto:hello@vanta.studio"
+                href={`mailto:${agencyEmail}`}
                 style={{
                   fontFamily: 'var(--font-heading)',
                   fontSize: '1.125rem',
@@ -330,35 +416,44 @@ export function Contact() {
                   color: 'var(--color-text-primary)',
                   textDecoration: 'none',
                   transition: 'color 0.2s ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-primary)')}
               >
-                <Mail size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
-                hello@vanta.studio
+                <Mail size={16} />
+                <span dir="ltr">{agencyEmail}</span>
               </a>
             </div>
 
             <div style={{ marginBottom: '2.5rem' }}>
-              <span className="text-label" style={{ display: 'block', marginBottom: '1rem' }}>LOCATION</span>
+              <span className="text-label" style={{ display: 'block', marginBottom: '1rem' }}>
+                {t('contact.location')}
+              </span>
               <p style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)' }}>
                 <MapPin size={16} />
-                Remote — Worldwide
+                {agencyLocation}
               </p>
             </div>
 
             <div style={{ marginBottom: '2.5rem' }}>
-              <span className="text-label" style={{ display: 'block', marginBottom: '1rem' }}>FOLLOW US</span>
+              <span className="text-label" style={{ display: 'block', marginBottom: '1rem' }}>
+                {t('contact.social')}
+              </span>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 {[
-                  { icon: Instagram, label: 'Instagram', href: '#' },
-                  { icon: Linkedin, label: 'LinkedIn', href: '#' },
-                  { icon: Github, label: 'GitHub', href: '#' },
+                  { icon: Instagram, label: 'Instagram', href: settings?.social?.instagram || '#' },
+                  { icon: Linkedin, label: 'LinkedIn', href: settings?.social?.linkedin || '#' },
+                  { icon: Github, label: 'GitHub', href: settings?.social?.github || '#' },
                 ].map(({ icon: Icon, label, href }) => (
                   <a
                     key={label}
                     href={href}
                     aria-label={label}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
                       width: '40px',
                       height: '40px',
@@ -409,7 +504,7 @@ export function Contact() {
                 className="pulse-dot"
               />
               <span className="text-body-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                Currently accepting new projects
+                {t('hero.availableForProjects')}
               </span>
             </div>
           </div>

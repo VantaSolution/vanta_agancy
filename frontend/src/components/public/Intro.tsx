@@ -1,8 +1,10 @@
 import React from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useTranslation } from '@/i18n';
 
 export function Intro() {
   const ref = useScrollReveal();
+  const { t } = useTranslation();
 
   return (
     <section
@@ -26,10 +28,10 @@ export function Intro() {
 
           <h2
             className="text-section-title"
-            style={{ marginBottom: '1.5rem' }}
+            style={{ marginBottom: '1.5rem', whiteSpace: 'pre-line' }}
           >
-            WE DON'T JUST BUILD WEBSITES.<br />
-            <span style={{ color: 'var(--color-accent)' }}>WE BUILD DIGITAL PRESENCE.</span>
+            {t('intro.headlineBeforeAccent')}
+            <span style={{ color: 'var(--color-accent)' }}>{t('intro.headlineAccent')}</span>
           </h2>
 
           <p
@@ -40,7 +42,7 @@ export function Intro() {
               lineHeight: 1.8,
             }}
           >
-            From a simple landing page to a complete digital platform, we design and develop experiences that make businesses look credible, perform better, and convert visitors into customers.
+            {t('intro.description')}
           </p>
         </div>
       </div>

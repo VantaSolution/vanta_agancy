@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/i18n';
 import { messagesAPI } from '@/api/endpoints';
+import { LanguageToggle } from '@/components/common/LanguageToggle';
 import {
   LayoutDashboard,
   FolderKanban,
@@ -15,18 +17,9 @@ import {
   X,
 } from 'lucide-react';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-  { icon: FolderKanban, label: 'Projects', path: '/admin/projects' },
-  { icon: Wrench, label: 'Services', path: '/admin/services' },
-  { icon: Mail, label: 'Messages', path: '/admin/messages' },
-  { icon: FileText, label: 'Content', path: '/admin/content' },
-  { icon: Image, label: 'Media', path: '/admin/media' },
-  { icon: Settings, label: 'Settings', path: '/admin/settings' },
-];
-
 export function AdminLayout() {
   const { user, logout } = useAuth();
+  const { t, isRtl } = useTranslation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -34,13 +27,42 @@ export function AdminLayout() {
   useEffect(() => {
     messagesAPI.list().then((messages) => {
       setUnreadCount(messages.filter((m) => m.status === 'new').length);
-    });
+    }).catch(() => {});
   }, []);
+
+  // Handle escape key to close mobile sidebar and body scroll locking
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSidebarOpen) {
+        setIsSidebarOpen(false);
+      }
+    };
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSidebarOpen]);
 
   const handleLogout = () => {
     logout();
     navigate('/admin/login');
   };
+
+  const navItems = [
+    { icon: LayoutDashboard, label: t('admin.nav.dashboard'), path: '/admin', id: 'dashboard' },
+    { icon: FolderKanban, label: t('admin.nav.projects'), path: '/admin/projects', id: 'projects' },
+    { icon: Wrench, label: t('admin.nav.services'), path: '/admin/services', id: 'services' },
+    { icon: Mail, label: t('admin.nav.messages'), path: '/admin/messages', id: 'messages' },
+    { icon: FileText, label: t('admin.nav.content'), path: '/admin/content', id: 'content' },
+    { icon: Image, label: t('admin.nav.media'), path: '/admin/media', id: 'media' },
+    { icon: Settings, label: t('admin.nav.settings'), path: '/admin/settings', id: 'settings' },
+  ];
 
   const sidebarWidth = '260px';
 
@@ -62,32 +84,30 @@ export function AdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className="admin-sidebar"
+        className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}
         style={{
           width: sidebarWidth,
-          minWidth: sidebarWidth,
           position: 'fixed',
           top: 0,
-          left: 0,
           bottom: 0,
+          insetInlineStart: 0,
           display: 'flex',
           flexDirection: 'column',
           padding: '1.5rem 0',
           zIndex: 999,
-          transform: isSidebarOpen ? 'translateX(0)' : undefined,
           transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Logo */}
-        <div style={{ padding: '0 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Logo & Admin Badge */}
+        <div style={{ padding: '0 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <a
             href="/"
             target="_blank"
             style={{
-              fontFamily: 'var(--font-heading)',
+              fontFamily: isRtl ? 'var(--font-arabic-heading)' : 'var(--font-heading)',
               fontSize: '1.125rem',
               fontWeight: 700,
-              letterSpacing: '0.08em',
+              letterSpacing: isRtl ? 'normal' : '0.08em',
               color: 'var(--color-text-primary)',
               textDecoration: 'none',
             }}
@@ -99,19 +119,24 @@ export function AdminLayout() {
               padding: '2px 8px',
               fontSize: '0.625rem',
               fontWeight: 600,
-              letterSpacing: '0.1em',
+              letterSpacing: isRtl ? 'normal' : '0.1em',
               color: 'var(--color-accent)',
               border: '1px solid var(--color-accent-muted)',
               borderRadius: '4px',
               textTransform: 'uppercase',
             }}
           >
-            ADMIN
+            {t('admin.badge')}
           </span>
         </div>
 
+        {/* Language switcher inside sidebar */}
+        <div style={{ padding: '0 1.5rem', marginBottom: '1.25rem' }}>
+          <LanguageToggle variant="button" style={{ width: '100%', justifyContent: 'center' }} />
+        </div>
+
         {/* Nav Items */}
-        <nav style={{ flex: 1, padding: '0 0.75rem' }}>
+        <nav style={{ flex: 1, padding: '0 0.75rem', overflowY: 'auto' }}>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -136,10 +161,10 @@ export function AdminLayout() {
             >
               <item.icon size={18} />
               <span>{item.label}</span>
-              {item.label === 'Messages' && unreadCount > 0 && (
+              {item.id === 'messages' && unreadCount > 0 && (
                 <span
                   style={{
-                    marginLeft: 'auto',
+                    marginInlineStart: 'auto',
                     padding: '1px 7px',
                     fontSize: '0.6875rem',
                     fontWeight: 600,
@@ -177,11 +202,11 @@ export function AdminLayout() {
             >
               {user?.name?.charAt(0) || 'A'}
             </div>
-            <div>
-              <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--color-text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                 {user?.name || 'Admin'}
               </p>
-              <p style={{ fontSize: '0.6875rem', color: 'var(--color-text-dim)' }}>
+              <p style={{ fontSize: '0.6875rem', color: 'var(--color-text-dim)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }} dir="ltr">
                 {user?.email || 'admin@vanta.studio'}
               </p>
             </div>
@@ -204,8 +229,8 @@ export function AdminLayout() {
             onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-status-error)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-muted)')}
           >
-            <LogOut size={16} />
-            Sign Out
+            <LogOut size={16} className="rtl-flip" />
+            <span>{t('admin.signOut')}</span>
           </button>
         </div>
       </aside>
@@ -215,7 +240,9 @@ export function AdminLayout() {
         className="admin-main"
         style={{
           flex: 1,
-          marginLeft: sidebarWidth,
+          minWidth: 0,
+          maxWidth: '100%',
+          marginInlineStart: sidebarWidth,
           minHeight: '100vh',
         }}
       >
@@ -243,24 +270,26 @@ export function AdminLayout() {
               border: 'none',
               cursor: 'pointer',
             }}
+            aria-label={t('nav.menu')}
+            aria-expanded={isSidebarOpen}
           >
             {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
           <span
             style={{
-              fontFamily: 'var(--font-heading)',
+              fontFamily: isRtl ? 'var(--font-arabic-heading)' : 'var(--font-heading)',
               fontSize: '0.9375rem',
               fontWeight: 700,
-              letterSpacing: '0.06em',
+              letterSpacing: isRtl ? 'normal' : '0.06em',
             }}
           >
             VANTA<span style={{ color: 'var(--color-accent)' }}>.</span>
           </span>
-          <div style={{ width: '34px' }} /> {/* Spacer */}
+          <LanguageToggle variant="badge" />
         </div>
 
         {/* Page content */}
-        <div style={{ padding: 'clamp(1.5rem, 3vw, 2.5rem)' }}>
+        <div style={{ padding: 'clamp(1.5rem, 3vw, 2.5rem)', minWidth: 0, maxWidth: '100%' }}>
           <Outlet />
         </div>
       </div>
@@ -270,8 +299,14 @@ export function AdminLayout() {
           .admin-sidebar {
             transform: translateX(-100%);
           }
+          [dir="rtl"] .admin-sidebar {
+            transform: translateX(100%);
+          }
+          .admin-sidebar.open {
+            transform: translateX(0) !important;
+          }
           .admin-main {
-            margin-left: 0 !important;
+            margin-inline-start: 0 !important;
           }
           .admin-topbar {
             display: flex !important;

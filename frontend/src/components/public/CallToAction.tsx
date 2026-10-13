@@ -1,17 +1,17 @@
 import React from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useWebsite } from '@/context/WebsiteContext';
+import { useTranslation } from '@/i18n';
 import { ArrowUpRight } from 'lucide-react';
 
 export function CallToAction() {
   const ref = useScrollReveal(0.15);
   const { content } = useWebsite();
+  const { t, decode } = useTranslation();
 
-  const ctaContent = content?.cta || {
-    heading: "HAVE AN IDEA?\nLET'S BUILD IT.",
-    description: "Tell us what you're building, what problem you're solving, and what you want your website to achieve.",
-    buttonText: "Start a Project",
-  };
+  const heading = content?.cta?.heading ? decode(content.cta.heading) : t('cta.heading');
+  const description = content?.cta?.description ? decode(content.cta.description) : t('cta.description');
+  const buttonText = content?.cta?.buttonText ? decode(content.cta.buttonText) : t('cta.buttonText');
 
   const scrollToContact = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -24,7 +24,8 @@ export function CallToAction() {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #0A0A0B 0%, #141415 40%, #1A1A0E 100%)',
+        maxWidth: '100%',
+        background: 'linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-surface) 45%, #0C1525 100%)',
       }}
     >
       {/* Accent glow */}
@@ -32,11 +33,11 @@ export function CallToAction() {
         style={{
           position: 'absolute',
           top: '-200px',
-          right: '-200px',
+          insetInlineEnd: '-200px',
           width: '500px',
           height: '500px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(232, 255, 74, 0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(0, 210, 255, 0.08) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -45,11 +46,11 @@ export function CallToAction() {
         style={{
           position: 'absolute',
           bottom: '-150px',
-          left: '-150px',
+          insetInlineStart: '-150px',
           width: '400px',
           height: '400px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(232, 255, 74, 0.04) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(0, 210, 255, 0.05) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -57,28 +58,28 @@ export function CallToAction() {
       <div className="container-narrow" ref={ref} style={{ position: 'relative', zIndex: 2 }}>
         <div className="reveal" style={{ textAlign: 'center' }}>
           <span className="text-label-accent" style={{ display: 'block', marginBottom: '2rem' }}>
-            // LET'S TALK
+            {t('cta.tag')}
           </span>
 
           <h2
             className="text-display"
             style={{
               marginBottom: '1.5rem',
-              lineHeight: 1.1,
+              lineHeight: 1.2,
               whiteSpace: 'pre-line',
             }}
           >
-            {ctaContent.heading}
+            {heading}
           </h2>
 
           <p
             className="text-body-lg reveal reveal-delay-2"
             style={{
-              maxWidth: '500px',
+              maxWidth: '520px',
               margin: '0 auto 2.5rem',
             }}
           >
-            {ctaContent.description}
+            {description}
           </p>
 
           <button
@@ -97,13 +98,12 @@ export function CallToAction() {
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              fontFamily: 'var(--font-body)',
               letterSpacing: '0.02em',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--color-accent-hover)';
               e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(232, 255, 74, 0.25)';
+              e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 210, 255, 0.3)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--color-accent)';
@@ -111,8 +111,8 @@ export function CallToAction() {
               e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            {ctaContent.buttonText}
-            <ArrowUpRight size={18} strokeWidth={2.5} />
+            <span>{buttonText}</span>
+            <ArrowUpRight size={18} strokeWidth={2.5} className="rtl-arrow-up-right" />
           </button>
         </div>
       </div>

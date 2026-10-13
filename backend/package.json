@@ -9,7 +9,8 @@
     "vercel-build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "migrate": "ts-node src/db/migrate.ts",
-    "seed": "ts-node src/db/seed.ts"
+    "seed": "ts-node src/db/seed.ts",
+    "add-admin": "ts-node scripts/add-admin.ts"
   },
   "dependencies": {
     "@prisma/client": "^7.9.1",

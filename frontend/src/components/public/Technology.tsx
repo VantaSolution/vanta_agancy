@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useTranslation } from '@/i18n';
 import { technologies, technologyConnections } from '@/data/technologies';
 
 interface NodePosition {
@@ -9,6 +10,7 @@ interface NodePosition {
 
 export function Technology() {
   const ref = useScrollReveal(0.1);
+  const { t, dict } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<NodePosition[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -65,19 +67,24 @@ export function Technology() {
         {/* Header */}
         <div className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <span className="text-label-accent" style={{ display: 'block', marginBottom: '1rem' }}>
-            // TECHNOLOGY
+            {t('technology.tag')}
           </span>
-          <h2 className="text-section-title">BUILT WITH MODERN TECHNOLOGY</h2>
+          <h2 className="text-section-title">{t('technology.heading')}</h2>
+          <p className="text-body" style={{ maxWidth: '600px', margin: '1rem auto 0' }}>
+            {t('technology.subtitle')}
+          </p>
         </div>
 
         {/* Constellation */}
         <div
           ref={containerRef}
-          className="reveal reveal-delay-2"
+          className="tech-constellation reveal reveal-delay-2"
           style={{
             position: 'relative',
             height: '500px',
             maxWidth: '900px',
+            width: '100%',
+            minWidth: 0,
             margin: '0 auto',
           }}
         >
@@ -105,7 +112,7 @@ export function Technology() {
                     y1={positions[from].y}
                     x2={positions[to].x}
                     y2={positions[to].y}
-                    stroke={isHighlighted ? 'rgba(232, 255, 74, 0.4)' : 'rgba(255, 255, 255, 0.06)'}
+                    stroke={isHighlighted ? 'rgba(0, 210, 255, 0.45)' : 'rgba(255, 255, 255, 0.06)'}
                     strokeWidth={isHighlighted ? 1.5 : 0.5}
                     style={{ transition: 'all 0.3s ease' }}
                   />
@@ -127,6 +134,17 @@ export function Technology() {
             return (
               <div
                 key={tech.name}
+                className="tech-node"
+                role="button"
+                tabIndex={0}
+                aria-label={`${tech.name} (${(dict.technology.categories as Record<string, string>)[tech.category] || tech.category})`}
+                onClick={() => setHoveredIndex(hoveredIndex === index ? null : index)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setHoveredIndex(hoveredIndex === index ? null : index);
+                  }
+                }}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 style={{
@@ -138,15 +156,17 @@ export function Technology() {
                   transition: 'all 0.3s ease',
                   opacity: isDimmed ? 0.3 : 1,
                   zIndex: isHovered ? 10 : 1,
+                  outlineOffset: '6px',
                 }}
               >
                 {/* Glow ring */}
                 <div
+                  className="tech-glow"
                   style={{
                     position: 'absolute',
                     inset: '-12px',
                     borderRadius: '50%',
-                    border: `1px solid ${isHovered ? 'var(--color-accent)' : isConnected ? 'rgba(232, 255, 74, 0.2)' : 'var(--color-border-subtle)'}`,
+                    border: `1px solid ${isHovered ? 'var(--color-accent)' : isConnected ? 'rgba(0, 210, 255, 0.25)' : 'var(--color-border-subtle)'}`,
                     backgroundColor: isHovered ? 'var(--color-accent-muted)' : 'transparent',
                     transition: 'all 0.3s ease',
                   }}
@@ -154,6 +174,7 @@ export function Technology() {
 
                 {/* Center dot */}
                 <div
+                  className="tech-dot"
                   style={{
                     width: '8px',
                     height: '8px',
@@ -167,6 +188,7 @@ export function Technology() {
 
                 {/* Label */}
                 <div
+                  className="tech-label"
                   style={{
                     position: 'absolute',
                     top: '100%',
@@ -198,7 +220,7 @@ export function Technology() {
                     }}
                   >
                     <span className="text-label" style={{ color: 'var(--color-text-dim)', fontSize: '0.625rem' }}>
-                      {tech.category}
+                      {(dict.technology.categories as Record<string, string>)[tech.category] || tech.category}
                     </span>
                   </div>
                 )}
@@ -211,40 +233,45 @@ export function Technology() {
       {/* Mobile fallback: simple grid */}
       <style>{`
         @media (max-width: 640px) {
-          .container-wide > div[style*="height: 500px"] {
+          .tech-constellation {
             height: auto !important;
             display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 1.5rem !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 1rem !important;
             position: relative !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
           }
-          .container-wide > div[style*="height: 500px"] > svg {
+          .tech-constellation > svg {
             display: none !important;
           }
-          .container-wide > div[style*="height: 500px"] > div {
+          .tech-node {
             position: relative !important;
             left: auto !important;
             top: auto !important;
             transform: none !important;
             text-align: center;
-            padding: 1.5rem;
+            padding: 1.25rem 0.75rem !important;
             border: 1px solid var(--color-border-subtle);
             border-radius: 8px;
+            min-width: 0 !important;
           }
-          .container-wide > div[style*="height: 500px"] > div > div:first-child {
+          .tech-glow {
             display: none !important;
           }
-          .container-wide > div[style*="height: 500px"] > div > div:nth-child(2) {
+          .tech-dot {
             width: 8px;
             height: 8px;
             margin: 0 auto;
           }
-          .container-wide > div[style*="height: 500px"] > div > div:nth-child(3) {
+          .tech-label {
             position: relative !important;
             top: auto !important;
             left: auto !important;
             transform: none !important;
             margin-top: 8px !important;
+            white-space: normal !important;
+            word-break: break-word !important;
           }
         }
       `}</style>

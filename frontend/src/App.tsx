@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { WebsiteProvider } from '@/context/WebsiteContext';
+import { LanguageProvider, useTranslation } from '@/i18n';
 import { HomePage } from '@/pages/HomePage';
 
 // Lazy-load all Admin-related pages and layouts to exclude Admin Panel code from initial public JS bundle
@@ -15,11 +16,18 @@ const ContentPage = lazy(() => import('@/pages/admin/ContentPage').then((m) => (
 const MediaPage = lazy(() => import('@/pages/admin/MediaPage').then((m) => ({ default: m.MediaPage })));
 const SettingsPage = lazy(() => import('@/pages/admin/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 
-const PageLoader = () => (
-  <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    <div className="text-label" style={{ color: 'var(--color-accent)', fontWeight: 500 }}>Loading...</div>
-  </div>
-);
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+
+const PageLoader = () => {
+  const { t } = useTranslation();
+  return (
+    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="text-label" style={{ color: 'var(--color-accent)', fontWeight: 500 }}>
+        {t('common.loading')}
+      </div>
+    </div>
+  );
+};
 
 // Protected Route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -42,8 +50,9 @@ function AppRoutes() {
       {/* Public Website — Eagerly loaded for zero-delay initial render */}
       <Route path="/" element={<HomePage />} />
 
-      {/* Admin Auth (Lazy Loaded) */}
+      {/* Admin Auth (Lazy Loaded) & /login alias */}
       <Route path="/admin/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
+      <Route path="/login" element={<Navigate to="/admin/login" replace />} />
 
       {/* Admin Panel (Protected + Lazy Loaded) */}
       <Route
@@ -65,8 +74,8 @@ function AppRoutes() {
         <Route path="settings" element={<Suspense fallback={<PageLoader />}><SettingsPage /></Suspense>} />
       </Route>
 
-      {/* Catch-all redirect */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* 404 Dedicated Not Found Page */}
+      <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
     </Routes>
   );
 }
@@ -74,11 +83,13 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <WebsiteProvider>
-          <AppRoutes />
-        </WebsiteProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <WebsiteProvider>
+            <AppRoutes />
+          </WebsiteProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }
