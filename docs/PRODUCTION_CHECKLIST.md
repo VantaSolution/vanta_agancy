@@ -7,7 +7,7 @@ Comprehensive verification matrix and sign-off report for public production rele
 ## 1. Release Status Summary
 
 - **Target Public URL**: `https://vanta-agency-frontend.vercel.app/`
-- **Target Backend API**: `https://vanta-backend.vercel.app/`
+- **Target Backend API**: `https://vanta-agency-backend.vercel.app/`
 - **Overall Launch Assessment**: **READY WITH ACCEPTED RISKS**
 - **Decision Rationale**: The entire frontend, backend routing, security hardening, rate limiting, Egyptian Arabic localization, SEO assets, and automated QA tests (15/15) have been verified with empirical evidence. Connecting the live PostgreSQL database host (`DATABASE_URL`) and Supabase storage key (`SUPABASE_SERVICE_ROLE_KEY`) is a standard administrative dashboard step that requires production secrets.
 

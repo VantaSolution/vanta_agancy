@@ -40,7 +40,7 @@ VANTA Agency V2.0 is structured as a monorepo containing two distinct deployable
 | `SUPABASE_URL` | Backend | Public | Yes | Project URL (`https://yuqcieznapwdtenybqqs.supabase.co`) | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Backend | **SECRET** | Yes | Privileged server-side key for Storage bucket write access | Yes |
 | `SUPABASE_STORAGE_BUCKET` | Backend | Public | Yes | Bucket name (Default: `vanta-media`) | Yes |
-| `VITE_API_URL` | Frontend | Public | Yes | Backend API base URL (`https://vanta-backend.vercel.app/api`) | Yes |
+| `VITE_API_URL` | Frontend | Public | Yes | Backend API base URL (`https://vanta-agency-backend.vercel.app/api`) | Yes |
 | `VITE_USE_MOCK` | Frontend | Public | Yes | Set to `false` for live backend data | Yes |
 
 > [!CAUTION]
@@ -55,14 +55,14 @@ VANTA Agency V2.0 is structured as a monorepo containing two distinct deployable
 1. Open [Vercel Dashboard](https://vercel.com/new).
 2. Import the Git repository: `https://github.com/VantaSolution/vanta_agancy`.
 3. In Project Configuration:
-   - **Project Name**: `vanta-backend`
+   - **Project Name**: `vanta-agency-backend`
    - **Framework Preset**: `Other`
    - **Root Directory**: Click *Edit* and select `backend`.
    - **Build Command**: `prisma generate && tsc`
    - **Output Directory**: Leave empty / default.
 4. Expand **Environment Variables** and add all Backend variables from the matrix above.
 5. Click **Deploy**.
-6. When deployment finishes, note the assigned URL (e.g. `https://vanta-backend.vercel.app`).
+6. When deployment finishes, note the assigned URL (e.g. `https://vanta-agency-backend.vercel.app`).
 
 ### 3.2 Step B: Execute Database Migrations & Initial Seed
 
@@ -96,7 +96,7 @@ This creates the tables (`admins`, `projects`, `services`, `messages`, `website_
    - **Output Directory**: `dist`
 4. Expand **Environment Variables**:
    ```env
-   VITE_API_URL=https://vanta-backend.vercel.app/api
+   VITE_API_URL=https://vanta-agency-backend.vercel.app/api
    VITE_USE_MOCK=false
    ```
 5. Click **Deploy**.
@@ -107,13 +107,13 @@ This creates the tables (`admins`, `projects`, `services`, `messages`, `website_
 
 ### 4.1 Automated Backend Health Check
 ```bash
-curl -I https://vanta-backend.vercel.app/health
+curl -I https://vanta-agency-backend.vercel.app/health
 # Expected: HTTP/2 200 OK
 ```
 
 ### 4.2 Content API Verification
 ```bash
-curl -s https://vanta-backend.vercel.app/api/content | head -n 20
+curl -s https://vanta-agency-backend.vercel.app/api/content | head -n 20
 # Expected: JSON object with success: true and content sections
 ```
 
