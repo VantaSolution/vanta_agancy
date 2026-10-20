@@ -155,11 +155,25 @@ async function runAudit() {
         '/api/messages',
         'POST',
         {},
-        { name: 'John Doe', email: 'invalid-email-address', message: 'Legitimate message content here' }
+        { name: 'John Doe', email: 'invalid-email-syntax', message: 'Legitimate message content here' }
       );
       recordTest(
         'Form Validation',
         'POST /api/messages rejects invalid email syntax with 400 VALIDATION_ERROR',
+        res.statusCode === 400 && res.data?.error?.code === 'VALIDATION_ERROR'
+      );
+    }
+    {
+      const res = await makeRequest(
+        server,
+        '/api/messages',
+        'POST',
+        {},
+        { name: 'John Doe', email: 'valid@vanta.studio', message: 'Hi' }
+      );
+      recordTest(
+        'Form Validation',
+        'POST /api/messages rejects message shorter than 5 chars with 400 VALIDATION_ERROR',
         res.statusCode === 400 && res.data?.error?.code === 'VALIDATION_ERROR'
       );
     }
