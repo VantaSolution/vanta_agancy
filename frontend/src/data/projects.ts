@@ -1,32 +1,88 @@
 import { Project } from '@/types';
 
 /**
- * Portfolio projects data.
- * 
- * When this array is empty, the Portfolio section renders
- * an elegant empty state with a CTA.
- * 
- * To add a project, push an object matching the Project interface:
- * 
- * {
- *   id: '1',
- *   name: 'Project Name',
- *   slug: 'project-name',
- *   shortDescription: 'Brief description',
- *   fullDescription: 'Full case study content',
- *   category: 'E-Commerce',
- *   clientName: 'Client Co.',
- *   projectImage: '/images/project-1.jpg',
- *   galleryImages: ['/images/project-1-gallery-1.jpg'],
- *   technologies: ['React', 'Node.js', 'PostgreSQL'],
- *   projectUrl: 'https://example.com',
- *   caseStudyUrl: '/work/project-name',
- *   isFeatured: true,
- *   isPublished: true,
- *   displayOrder: 1,
- *   projectDate: '2026-01-15',
- *   createdAt: '',
- *   updatedAt: '',
- * }
+ * Default portfolio projects showcasing VANTA's core digital capabilities:
+ * Fintech & Asset Intelligence, Luxury E-Commerce, AI / SaaS Systems, and Smart Booking Platforms.
  */
-export const defaultProjects: Project[] = [];
+export const defaultProjects: Project[] = [
+  {
+    id: '1',
+    name: 'Valor Wealth ~ منصة ڤالور لإدارة الأصول',
+    slug: 'valor-wealth',
+    shortDescription: 'Real-time portfolio management and institutional analytics dashboard engineered for ultra-low latency and complex financial metrics. ~ منصة مالية متطورة لإدارة المحافظ الاستثمارية وتحليلات التداول اللحظية، مبنية بأعلى سرعة وتجربة استخدام تفاعلية وسلسة.',
+    fullDescription: 'Comprehensive wealth management platform engineered with React, TypeScript, and high-frequency data pipelines to monitor institutional assets in real time.',
+    category: 'Fintech Platform ~ منصات التكنولوجيا المالية (Fintech)',
+    clientName: 'Valor Capital Partners ~ ڤالور كابيتال',
+    projectImage: '/images/project-1.jpg',
+    galleryImages: ['/images/project-1.jpg'],
+    technologies: ['React', 'TypeScript', 'TailwindCSS', 'Chart.js', 'Node.js', 'PostgreSQL'],
+    projectUrl: '#',
+    caseStudyUrl: '#work',
+    isFeatured: true,
+    isPublished: true,
+    displayOrder: 1,
+    projectDate: '2026-02-15',
+    createdAt: '2026-02-15T00:00:00.000Z',
+    updatedAt: '2026-02-15T00:00:00.000Z',
+  },
+  {
+    id: '2',
+    name: 'Aurora Flagship ~ متجر أورورا للأزياء الراقية',
+    slug: 'aurora-fashion',
+    shortDescription: 'Bespoke editorial e-commerce platform blending high-end fashion aesthetics, instant search, and headless checkout speed. ~ متجر إلكتروني فاخر للأزياء بيجمع بين أناقة التصميم، والبحث اللحظي السريع، وتجربة دفع وشراء سهلة جداً وسلسة.',
+    fullDescription: 'Luxury editorial e-commerce web application featuring bespoke typographic layouts, instant client-side catalog filtering, and frictionless cart experiences.',
+    category: 'E-Commerce ~ المتاجر الإلكترونية الفاخرة',
+    clientName: 'Aurora Atelier ~ أورورا أتيليه',
+    projectImage: '/images/project-2.jpg',
+    galleryImages: ['/images/project-2.jpg'],
+    technologies: ['Next.js', 'TypeScript', 'TailwindCSS', 'Stripe', 'Supabase', 'Redis'],
+    projectUrl: '#',
+    caseStudyUrl: '#work',
+    isFeatured: true,
+    isPublished: true,
+    displayOrder: 2,
+    projectDate: '2026-01-20',
+    createdAt: '2026-01-20T00:00:00.000Z',
+    updatedAt: '2026-01-20T00:00:00.000Z',
+  },
+  {
+    id: '3',
+    name: 'Neural Studio ~ منصة نيورال لمراقبة الذكاء الاصطناعي',
+    slug: 'neural-studio',
+    shortDescription: 'Enterprise SaaS cockpit for monitoring neural model latency, token pipelines, node graphs, and real-time agent deployments. ~ لوحة تحكم سحابية لمتابعة نماذج الذكاء الاصطناعي، ومراقبة استهلاك الموارد وسرعة الاستجابة اللحظية للأنظمة الذكية.',
+    fullDescription: 'High-density SaaS platform for AI engineers and operations teams to monitor prompt latency, distributed inference clusters, and pipeline throughput.',
+    category: 'Custom Web Application ~ تطبيقات الويب المخصصة (SaaS)',
+    clientName: 'Cortex AI Labs ~ كورتيكس لابز',
+    projectImage: '/images/project-3.jpg',
+    galleryImages: ['/images/project-3.jpg'],
+    technologies: ['React', 'TypeScript', 'Node.js', 'WebSockets', 'TailwindCSS', 'Docker'],
+    projectUrl: '#',
+    caseStudyUrl: '#work',
+    isFeatured: true,
+    isPublished: true,
+    displayOrder: 3,
+    projectDate: '2026-03-05',
+    createdAt: '2026-03-05T00:00:00.000Z',
+    updatedAt: '2026-03-05T00:00:00.000Z',
+  },
+  {
+    id: '4',
+    name: 'CareConnect Telehealth ~ منصة كير كونكت للعيادات والمواعيد',
+    slug: 'care-connect',
+    shortDescription: 'Modern clinical booking and telehealth consultation portal featuring doctor availability schedules, patient health metrics, and instant appointments. ~ منصة طبية متكاملة لحجز المواعيد والاستشارات عن بُعد، بتوفر جداول مواعيد الأطباء اللحظية ومتابعة صحية مريحة للمريض.',
+    fullDescription: 'Next-generation healthcare portal designed for seamless physician discovery, appointment scheduling, and encrypted video consultation rooms.',
+    category: 'Booking Systems ~ أنظمة الحجز والمنصات الذكية',
+    clientName: 'CareConnect Health ~ كير كونكت للرعاية الصحية',
+    projectImage: '/images/project-4.jpg',
+    galleryImages: ['/images/project-4.jpg'],
+    technologies: ['React', 'TypeScript', 'Node.js', 'WebRTC', 'TailwindCSS', 'PostgreSQL'],
+    projectUrl: '#',
+    caseStudyUrl: '#work',
+    isFeatured: true,
+    isPublished: true,
+    displayOrder: 4,
+    projectDate: '2025-11-10',
+    createdAt: '2025-11-10T00:00:00.000Z',
+    updatedAt: '2025-11-10T00:00:00.000Z',
+  },
+];

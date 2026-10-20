@@ -18,17 +18,25 @@ router.get('/', authenticateJWT, async (req: Request, res: Response) => {
 // POST /api/messages — Public (contact form submission)
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const b = req.body;
-    const name = b.name;
-    const email = b.email;
-    const company = b.company || '';
-    const project_type = b.projectType || b.project_type || '';
-    const budget_range = b.budgetRange || b.budget_range || '';
-    const message = b.message;
+    const b = req.body || {};
+    const name = typeof b.name === 'string' ? b.name.trim() : '';
+    const email = typeof b.email === 'string' ? b.email.trim() : '';
+    const company = typeof b.company === 'string' ? b.company.trim().slice(0, 150) : '';
+    const project_type = typeof (b.projectType || b.project_type) === 'string' ? String(b.projectType || b.project_type).trim().slice(0, 100) : '';
+    const budget_range = typeof (b.budgetRange || b.budget_range) === 'string' ? String(b.budgetRange || b.budget_range).trim().slice(0, 100) : '';
+    const message = typeof b.message === 'string' ? b.message.trim() : '';
 
-    if (!name || !email || !message) {
-      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Name, email, and message are required' } });
+    if (!name || name.length < 2 || name.length > 100) {
+      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Name must be between 2 and 100 characters' } });
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email) || email.length > 255) {
+      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'A valid email address is required' } });
+    }
+    if (!message || message.length < 5 || message.length > 5000) {
+      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'Message must be between 5 and 5000 characters' } });
+    }
+
     const result = await query(
       'INSERT INTO messages (name, email, company, project_type, budget_range, message) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *',
       [name, email, company, project_type, budget_range, message]

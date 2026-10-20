@@ -91,27 +91,27 @@ const SEED_TRANSLATIONS: Record<string, { ar: string; en: string }> = {
   // Services
   'Website Development': {
     en: 'Website Development',
-    ar: 'تطوير المواقع الإلكترونية',
+    ar: 'تطوير وتصميم المواقع الإلكترونية',
   },
   'Custom-built, high-performance websites.': {
     en: 'Custom-built, high-performance websites.',
-    ar: 'مواقع مخصصة فائقة الأداء مصممة من الصفر بأحدث التقنيات.',
+    ar: 'مواقع مخصصة وفائقة السرعة، مبنية من الصفر بأحدث التقنيات وبتفاصيل متقنة تليق باسم شركتك.',
   },
   'Landing Pages': {
     en: 'Landing Pages',
-    ar: 'صفحات الهبوط الاستراتيجية',
+    ar: 'صفحات الهبوط الاستراتيجية (Landing Pages)',
   },
   'Conversion-focused landing pages.': {
     en: 'Conversion-focused landing pages.',
-    ar: 'صفحات هبوط موجهة لزيادة معدل التحويل، تبرز القيمة الفريدة لخدماتك.',
+    ar: 'صفحات هبوط معمولة مخصوص لزيادة المبيعات ومعدلات التحويل، تبرز ميزة خدمتك وتجيب لك عملاء حقيقيين.',
   },
   'Business Websites': {
     en: 'Business Websites',
-    ar: 'مواقع الشركات والأعمال',
+    ar: 'مواقع الشركات والأعمال الفاخرة',
   },
   'Professional digital presence for businesses.': {
     en: 'Professional digital presence for businesses.',
-    ar: 'حضور رقمي فاخر للشركات والمؤسسات يعزز مكانتك في السوق.',
+    ar: 'واجهة رقمية فخمة تعكس مكانة شركتك في السوق، وتبني ثقة فورية عند كبار العملاء والمستثمرين.',
   },
   'Booking Systems': {
     en: 'Booking Systems',
@@ -119,7 +119,7 @@ const SEED_TRANSLATIONS: Record<string, { ar: string; en: string }> = {
   },
   'Restaurant, clinic, and reservation platforms.': {
     en: 'Restaurant, clinic, and reservation platforms.',
-    ar: 'أنظمة حجز للمطاعم والعيادات ومقدمي الخدمات مع إدارة المواعيد وقوائم رقمية.',
+    ar: 'أنظمة حجز متطورة للمطاعم والعيادات ومقدمي الخدمات مع جداول مواعيد ذكية وقوائم رقمية فورية.',
   },
   'E-Commerce': {
     en: 'E-Commerce',
@@ -127,7 +127,7 @@ const SEED_TRANSLATIONS: Record<string, { ar: string; en: string }> = {
   },
   'Full-featured online stores.': {
     en: 'Full-featured online stores.',
-    ar: 'متاجر رقمية متكاملة ببوابات دفع آمنة، إدارة ذكية للمخزون، وتجربة شراء سلسة.',
+    ar: 'متاجر رقمية متكاملة ببوابات دفع آمنة وسريعة، إدارة ذكية للمخزون، وتجربة شراء سلسة وممتعة.',
   },
   'Custom Web Applications': {
     en: 'Custom Web Applications',
@@ -135,75 +135,75 @@ const SEED_TRANSLATIONS: Record<string, { ar: string; en: string }> = {
   },
   'Tailored web apps for specific business needs.': {
     en: 'Tailored web apps for specific business needs.',
-    ar: 'حلول برمجية ولوحات تحكم وأدوات سحابية مصممة خصيصاً لأتمتة أعمالك.',
+    ar: 'أنظمة سحابية ولوحات تحكم وأدوات داخلية متطورة، مصممة مخصوص لأتمتة عملياتك وحل أصعب تحديات الشغل.',
   },
   'Maintenance & Hosting': {
     en: 'Maintenance & Hosting',
-    ar: 'الدعم الفني والاستضافة السحابية',
+    ar: 'الصيانة السحابية والدعم الفني',
   },
   'Ongoing support and infrastructure.': {
     en: 'Ongoing support and infrastructure.',
-    ar: 'صيانة مستمرة، مراقبة أمنية على مدار الساعة، وبنية تحتية سحابية مستقرة.',
+    ar: 'متابعة وأمان على مدار الساعة، تحديثات مستمرة، وبنية تحتية سحابية تضمن إن موقعك يفضل شغال بكفاءة طول الوقت.',
   },
 
   // Hero default content
   'WE BUILD DIGITAL EXPERIENCES\nTHAT MOVE BUSINESSES FORWARD.': {
     en: 'WE BUILD DIGITAL EXPERIENCES\nTHAT MOVE BUSINESSES FORWARD.',
-    ar: 'نصنع تجارب رقمية استثنائية\nتدفع أعمالك نحو النمو والريادة.',
+    ar: 'بنصنع تجارب رقمية استثنائية\nتطوّر شغلك وتنقله لمستوى أعلى.',
   },
   'We design and develop fast, modern websites and digital products for businesses that want to stand out, perform better, and grow.': {
     en: 'We design and develop fast, modern websites and digital products for businesses that want to stand out, perform better, and grow.',
-    ar: 'نصمم ونطور مواقع ويب فائقة السرعة وتطبيقات حديثة تلبي طموحات الشركات الراغبة في التميز، الأداء العالي، والمظهر الاحترافي الراقي.',
+    ar: 'بنصمم ونطوّر مواقع وتطبيقات ويب سريعة وحديثة، معمولة مخصوص للشركات اللي عاوزة تتميز بمظهر احترافي فخم وأداء عالي يحقق نتائج حقيقية.',
   },
   'Start a Project': {
     en: "Let's Turn Your Idea Into Reality",
-    ar: 'يلا نحوّل فكرتك لواقع',
+    ar: 'خلّينا نبدأ مشروعك',
   },
   'ابدأ مشروعك معنا': {
     en: "Let's Turn Your Idea Into Reality",
-    ar: 'يلا نحوّل فكرتك لواقع',
+    ar: 'خلّينا نبدأ مشروعك',
   },
   "Let's Turn Your Idea Into Reality": {
     en: "Let's Turn Your Idea Into Reality",
-    ar: 'يلا نحوّل فكرتك لواقع',
+    ar: 'خلّينا نبدأ مشروعك',
   },
-  'يلا نحوّل فكرتك لواقع': {
+  'خلّينا نبدأ مشروعك': {
     en: "Let's Turn Your Idea Into Reality",
-    ar: 'يلا نحوّل فكرتك لواقع',
+    ar: 'خلّينا نبدأ مشروعك',
   },
   'View Our Work': {
     en: 'View Our Work',
-    ar: 'استعرض أعمالنا',
+    ar: 'شوف أعمالنا',
   },
 
   // About default content
   'SMALL STUDIO.\nBIG DIGITAL IMPACT.': {
     en: 'SMALL STUDIO.\nBIG DIGITAL IMPACT.',
-    ar: 'استوديو مركز.\nأثر رقمي واسع.',
+    ar: 'استوديو مركّز.\nأثر رقمي كبير.',
   },
   "We're a focused digital studio that combines design, development, strategy, and performance into one seamless process.": {
     en: "We're a focused digital studio that combines design, development, strategy, and performance into one seamless process.",
-    ar: 'نحن استوديو تقني وإبداعي يجمع بين براعة التصميم، متانة البرمجة، الفكر الاستراتيجي، والسرعة الفائقة في حزمة متناغمة واحدة.',
+    ar: 'إحنا استوديو تقني وإبداعي بيجمع بين جمال التصميم، وقوة البرمجة، والتفكير الاستراتيجي والسرعة العالية في فريق متناغم واحد. من غير زحمة إدارية أو طبقات معقدة — تنفيذ دقيق ونتائج حقيقية.',
   },
   'Every project we take on gets the full attention of our senior team.': {
     en: 'Every project we take on gets the full attention of our senior team.',
-    ar: 'يحظى كل مشروع نتولاه بالاهتمام الكامل من فريقنا المتمرس. نتعامل مع نمو مشروعك كأنه استثمارنا الخاص.',
+    ar: 'كل مشروع بنستلمه بياخد كامل تركيز واهتمام فريقنا المتمرس. بنتعامل مع نجاح مشروعك وكأنه استثمارنا الشخصي، لأن دي الطريقة الوحيدة اللي بتطلع منتجات رقمية ناجحة ومبهرة بجد.',
   },
 
   // CTA default content
   "HAVE AN IDEA?\nLET'S BUILD IT.": {
     en: "HAVE AN IDEA?\nLET'S BUILD IT.",
-    ar: 'لديك فكرة طموحة؟\nدعنا نبنيها لك معاً.',
+    ar: 'عندك فكرة مشروع؟\nخلّينا نبنيها سوا.',
   },
   "Tell us what you're building, what problem you're solving, and what you want your website to achieve.": {
     en: "Tell us what you're building, what problem you're solving, and what you want your website to achieve.",
-    ar: 'أخبرنا بما تخطط لبنائه والتحدي الذي تسعى لحله والنتائج التي تطمح لتحقيقها، وسنتولى تحويله إلى واقع استثنائي.',
+    ar: 'احكيلنا بتفكر تبني إيه، إيه التحدي اللي عاوز تحله، والنتائج اللي بتطمح توصلها. وإحنا هنتولى تحويل فكرتك لواقع يبهرك.',
   },
 
   // General & Location
   'Remote — Worldwide': {
     en: 'Remote — Worldwide',
-    ar: 'عن بُعد — تغطية لجميع أنحاء العالم',
+    ar: 'عن بُعد — شغالين مع عملاء من كل أنحاء العالم',
   },
   'VANTA — Digital Studio': {
     en: 'VANTA — Digital Studio',
@@ -211,7 +211,7 @@ const SEED_TRANSLATIONS: Record<string, { ar: string; en: string }> = {
   },
   'Premium digital studio.': {
     en: 'Premium digital studio.',
-    ar: 'استوديو رقمي متخصص في هندسة وتطوير مواقع وتطبيقات عصرية فائقة السرعة.',
+    ar: 'استوديو رقمي متخصص في هندسة وتطوير مواقع وتطبيقات عصرية وسريعة جداً للشركات الطموحة.',
   },
 };
 

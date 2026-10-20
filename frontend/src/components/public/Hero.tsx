@@ -1,13 +1,14 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { useWebsite } from '@/context/WebsiteContext';
 import { useTranslation } from '@/i18n';
-import { ArrowUpRight, ChevronDown } from 'lucide-react';
+import { ChevronDown, Activity } from 'lucide-react';
 
-// ─── Canvas Animation: Digital System ───
+// ─── Canvas Animation: Interactive Constellation & Quantum Nodes ───
 function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const animationRef = useRef<number>(0);
-  const nodesRef = useRef<{ x: number; y: number; vx: number; vy: number; radius: number; }[]>([]);
+  const nodesRef = useRef<{ x: number; y: number; vx: number; vy: number; radius: number; isAnchor?: boolean; pulse?: number }[]>([]);
   const dimensionsRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const mouseRef = useRef<{ x: number; y: number; active: boolean }>({ x: -1000, y: -1000, active: false });
 
   const init = useCallback((canvas: HTMLCanvasElement) => {
     const dpr = window.devicePixelRatio || 1;
@@ -20,14 +21,16 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     const ctx = canvas.getContext('2d');
     if (ctx) ctx.scale(dpr, dpr);
 
-    // Create nodes
-    const nodeCount = Math.min(40, Math.floor(width / 25));
-    nodesRef.current = Array.from({ length: nodeCount }, () => ({
+    // Create nodes with distinct hierarchy (regular nodes + glowing anchors)
+    const nodeCount = Math.min(55, Math.max(25, Math.floor(width / 22)));
+    nodesRef.current = Array.from({ length: nodeCount }, (_, i) => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      radius: Math.random() * 2 + 1,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.45,
+      radius: i % 7 === 0 ? 3.5 : Math.random() * 1.8 + 1,
+      isAnchor: i % 7 === 0,
+      pulse: Math.random() * Math.PI * 2,
     }));
   }, []);
 
@@ -41,7 +44,9 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     ctx.clearRect(0, 0, width, height);
 
     const nodes = nodesRef.current;
-    const connectionDistance = 140;
+    const connectionDistance = 145;
+    const mouse = mouseRef.current;
+    const mouseDistMax = 160;
 
     // Update positions
     nodes.forEach((node) => {
@@ -51,9 +56,25 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       if (node.y < 0 || node.y > height) node.vy *= -1;
       node.x = Math.max(0, Math.min(width, node.x));
       node.y = Math.max(0, Math.min(height, node.y));
+
+      if (node.pulse !== undefined) {
+        node.pulse += 0.03;
+      }
+
+      // Gentle interactive mouse repulsion/connection
+      if (mouse.active) {
+        const dx = node.x - mouse.x;
+        const dy = node.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouseDistMax && dist > 0) {
+          const force = (1 - dist / mouseDistMax) * 0.35;
+          node.x += (dx / dist) * force;
+          node.y += (dy / dist) * force;
+        }
+      }
     });
 
-    // Draw connections
+    // Draw node-to-node connections
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const dx = nodes[i].x - nodes[j].x;
@@ -61,23 +82,54 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < connectionDistance) {
-          const opacity = (1 - dist / connectionDistance) * 0.25;
+          const opacity = (1 - dist / connectionDistance) * 0.28;
           ctx.beginPath();
           ctx.moveTo(nodes[i].x, nodes[i].y);
           ctx.lineTo(nodes[j].x, nodes[j].y);
           ctx.strokeStyle = `rgba(0, 210, 255, ${opacity})`;
-          ctx.lineWidth = 0.6;
+          ctx.lineWidth = 0.65;
+          ctx.stroke();
+        }
+      }
+
+      // Connect to mouse if active and within proximity
+      if (mouse.active) {
+        const dx = nodes[i].x - mouse.x;
+        const dy = nodes[i].y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouseDistMax) {
+          const opacity = (1 - dist / mouseDistMax) * 0.45;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = `rgba(0, 210, 255, ${opacity})`;
+          ctx.lineWidth = 0.8;
           ctx.stroke();
         }
       }
     }
 
-    // Draw nodes
+    // Draw nodes & anchor glow rings
     nodes.forEach((node) => {
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 210, 255, 0.75)';
-      ctx.fill();
+      if (node.isAnchor) {
+        const pulseScale = Math.sin(node.pulse || 0) * 2 + 6;
+        // Outer glow halo
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, pulseScale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 210, 255, 0.15)';
+        ctx.fill();
+
+        // Core anchor
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#00D2FF';
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 210, 255, 0.7)';
+        ctx.fill();
+      }
     });
 
     animationRef.current = requestAnimationFrame(() => animate(canvas));
@@ -96,11 +148,30 @@ function useDigitalCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     const handleResize = () => {
       if (canvas) init(canvas);
     };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        active: true,
+      };
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current.active = false;
+    };
+
     window.addEventListener('resize', handleResize);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
       cancelAnimationFrame(animationRef.current);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [canvasRef, init, animate]);
 }
@@ -111,16 +182,9 @@ export function Hero() {
   const { content } = useWebsite();
   const { t, decode, isRtl } = useTranslation();
 
-  // If content has bilingual text or is default, decode properly or fallback to localized translation
   const headline = content?.hero?.headline ? decode(content.hero.headline) : t('hero.headline');
   const description = content?.hero?.description ? decode(content.hero.description) : t('hero.description');
-  const primaryCta = content?.hero?.primaryCta ? decode(content.hero.primaryCta) : t('hero.primaryCta');
   const secondaryCta = content?.hero?.secondaryCta ? decode(content.hero.secondaryCta) : t('hero.secondaryCta');
-
-  const scrollToContact = (e: React.MouseEvent) => {
-    e.preventDefault();
-    document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   const scrollToWork = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -140,33 +204,62 @@ export function Hero() {
         paddingTop: '80px',
       }}
     >
-      {/* Canvas Background */}
+      {/* Ambient Radial Lighting Spotlight */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '25%',
+          insetInlineEnd: '15%',
+          width: 'clamp(400px, 50vw, 750px)',
+          height: 'clamp(400px, 50vw, 750px)',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0, 210, 255, 0.12) 0%, rgba(0, 210, 255, 0.02) 45%, transparent 70%)',
+          pointerEvents: 'none',
+          filter: 'blur(30px)',
+        }}
+      />
+
+      {/* Subtle secondary backlight */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '10%',
+          insetInlineStart: '10%',
+          width: '350px',
+          height: '350px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0, 210, 255, 0.05) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Interactive Canvas Background */}
       <canvas
         ref={canvasRef}
         style={{
           position: 'absolute',
           top: 0,
           insetInlineEnd: 0,
-          width: '60%',
+          width: '65%',
           height: '100%',
-          opacity: 0.6,
+          opacity: 0.75,
           pointerEvents: 'none',
         }}
       />
 
-      {/* Gradient overlay */}
+      {/* Gradient Mask for High Contrast Readability */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           background: isRtl
-            ? 'linear-gradient(225deg, var(--color-bg-primary) 40%, transparent 100%)'
-            : 'linear-gradient(135deg, var(--color-bg-primary) 40%, transparent 100%)',
+            ? 'linear-gradient(225deg, var(--color-bg-primary) 35%, rgba(9, 10, 15, 0.6) 70%, transparent 100%)'
+            : 'linear-gradient(135deg, var(--color-bg-primary) 35%, rgba(9, 10, 15, 0.6) 70%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Top edge accent line */}
+      {/* Top Edge Ambient Highlight Line */}
       <div
         style={{
           position: 'absolute',
@@ -175,48 +268,78 @@ export function Hero() {
           insetInlineEnd: 0,
           height: '1px',
           background: 'linear-gradient(90deg, transparent, var(--color-accent), transparent)',
-          opacity: 0.3,
+          opacity: 0.4,
         }}
       />
 
-      <div className="container-wide" style={{ position: 'relative', zIndex: 2, paddingTop: '3rem', paddingBottom: '3rem' }}>
-        <div style={{ maxWidth: '800px' }}>
-          {/* Meta labels */}
+      <div
+        className="container-wide"
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          paddingTop: '3.5rem',
+          paddingBottom: '3.5rem',
+        }}
+      >
+        <div style={{ maxWidth: '820px' }}>
+          {/* Studio Meta Badge & Status Pill */}
           <div
             className="hero-reveal hero-reveal-delay-1"
             style={{
               display: 'flex',
-              gap: '1.5rem',
+              gap: '1.25rem',
               marginBottom: '2rem',
               flexWrap: 'wrap',
               alignItems: 'center',
             }}
           >
-            <span className="text-label-accent">{t('hero.digitalStudio')}</span>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '5px 12px',
+                borderRadius: '9999px',
+                backgroundColor: 'rgba(0, 210, 255, 0.08)',
+                border: '1px solid rgba(0, 210, 255, 0.25)',
+                color: 'var(--color-accent)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.04em',
+              }}
+            >
+              <Activity size={13} className="pulse-dot" />
+              <span>{t('hero.digitalStudio')}</span>
+            </div>
+
             <span className="text-label" style={{ color: 'var(--color-text-dim)' }}>—</span>
-            <span className="text-label">{t('hero.webDevelopment')}</span>
+            <span className="text-label" style={{ color: 'var(--color-text-secondary)' }}>{t('hero.webDevelopment')}</span>
             <span className="text-label" style={{ color: 'var(--color-text-dim)' }}>—</span>
-            <span className="text-label">{t('hero.established')}</span>
+            <span className="text-label" style={{ color: 'var(--color-text-muted)' }}>{t('hero.established')}</span>
           </div>
 
-          {/* Dynamic Headline */}
+          {/* Dynamic Headline with Refined Typography & Accent */}
           <h1
             className="text-display hero-reveal hero-reveal-delay-2"
             style={{
               marginBottom: '1.5rem',
-              maxWidth: '750px',
+              maxWidth: '780px',
               whiteSpace: 'pre-line',
+              letterSpacing: isRtl ? 'normal' : '-0.03em',
+              lineHeight: isRtl ? 1.3 : 1.08,
             }}
           >
             {headline}
           </h1>
 
-          {/* Dynamic Description */}
+          {/* Dynamic Subheading Description */}
           <p
             className="text-body-lg hero-reveal hero-reveal-delay-3"
             style={{
-              maxWidth: '540px',
+              maxWidth: '560px',
               marginBottom: '2.5rem',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 1.75,
             }}
           >
             {description}
@@ -236,42 +359,9 @@ export function Hero() {
               <ChevronDown size={16} className="hero-explore-chevron" />
             </button>
           </div>
-
-          {/* Prominent Availability Badge — Repositioned further DOWN within Hero */}
-          <div
-            className="hero-reveal hero-reveal-delay-5"
-            style={{
-              marginTop: 'clamp(2.75rem, 5.5vh, 4.5rem)',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <button
-              type="button"
-              onClick={scrollToContact}
-              className="hero-availability-badge"
-              aria-label={`${t('hero.availableForProjects')} - ${t('hero.reachOut')}`}
-            >
-              <span className="availability-dot-wrapper" aria-hidden="true">
-                <span className="availability-dot-ping" />
-                <span className="availability-dot-core" />
-              </span>
-
-              <span className="availability-badge-text">
-                {t('hero.availableForProjects')}
-              </span>
-
-              <span className="availability-badge-divider" aria-hidden="true">|</span>
-
-              <span className="availability-badge-action">
-                <span>{t('hero.reachOut')}</span>
-                <ArrowUpRight size={14} strokeWidth={2.5} className="rtl-arrow-up-right availability-badge-arrow" />
-              </span>
-            </button>
-          </div>
         </div>
 
-        {/* Bottom metadata row */}
+        {/* Bottom Metadata Bar */}
         <div
           className="hero-reveal hero-reveal-delay-5"
           style={{
@@ -287,12 +377,14 @@ export function Hero() {
             pointerEvents: 'none',
           }}
         >
-          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem' }}>
-            {t('hero.version')}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem' }}>
+              {t('hero.version')}
+            </span>
+          </div>
 
-          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem', opacity: 0.65 }}>
-            {isRtl ? 'تمرير للاستكشاف ↓' : 'Scroll to explore ↓'}
+          <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem', opacity: 0.75 }}>
+            {isRtl ? 'انزل للاستكشاف ↓' : 'Scroll to explore ↓'}
           </span>
         </div>
       </div>

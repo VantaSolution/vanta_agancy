@@ -41,7 +41,7 @@ export function Navbar() {
     <>
       {/* Accessible Skip Link */}
       <a href="#main-content" className="skip-link">
-        {isRtl ? 'الانتقال إلى المحتوى الرئيسي' : 'Skip to main content'}
+        {t('nav.skipToContent')}
       </a>
 
       <nav

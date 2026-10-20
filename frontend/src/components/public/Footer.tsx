@@ -208,9 +208,9 @@ export function Footer() {
                 e.currentTarget.style.color = 'var(--color-text-secondary)';
                 e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
               }}
-              aria-label={isRtl ? 'العودة إلى أعلى الصفحة' : 'Back to top'}
+              aria-label={isRtl ? 'الرجوع للأعلى' : 'Back to top'}
             >
-              <span>{isRtl ? 'إلى الأعلى' : 'Back to top'}</span>
+              <span>{isRtl ? 'للأعلى' : 'Back to top'}</span>
               <ArrowUp size={14} />
             </button>
           </div>
@@ -244,7 +244,7 @@ export function Footer() {
               onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-dim)')}
             >
-              {isRtl ? 'بوابة الإدارة' : 'Staff Portal'}
+              {isRtl ? 'لوحة التحكم' : 'Staff Portal'}
             </Link>
             <span className="text-mono" style={{ color: 'var(--color-text-dim)', fontSize: '0.75rem', overflowWrap: 'anywhere' }}>
               {t('footer.designedAndBuilt')}

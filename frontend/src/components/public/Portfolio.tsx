@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useWebsite } from '@/context/WebsiteContext';
 import { useTranslation } from '@/i18n';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Sparkles, ExternalLink } from 'lucide-react';
 import type { Project } from '@/types';
 
-// ─── Project Card (for when projects exist) ───
+// ─── Project Card ───
 function ProjectCard({ project }: { project: Project }) {
   const { decode, t } = useTranslation();
+  const [isHovered, setIsHovered] = useState(false);
+
   const name = decode(project.name);
   const category = decode(project.category);
   const shortDescription = decode(project.shortDescription);
+  const clientName = decode(project.clientName);
   const hasUrl = Boolean(project.projectUrl && project.projectUrl !== '#');
 
   const handleClick = (e: React.MouseEvent) => {
@@ -21,90 +24,270 @@ function ProjectCard({ project }: { project: Project }) {
   };
 
   const cardStyle: React.CSSProperties = {
-    display: 'block',
-    border: '1px solid var(--color-border-subtle)',
-    borderRadius: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    border: `1px solid ${isHovered ? 'var(--color-accent)' : 'var(--color-border-subtle)'}`,
+    borderRadius: '12px',
     overflow: 'hidden',
     backgroundColor: 'var(--color-bg-surface)',
-    transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+    transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease',
+    transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
+    boxShadow: isHovered
+      ? '0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(0, 210, 255, 0.12)'
+      : '0 4px 16px rgba(0, 0, 0, 0.25)',
     cursor: 'pointer',
     textDecoration: 'none',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+    position: 'relative',
+    height: '100%',
   };
 
   const content = (
     <>
-      {/* Project Image */}
+      {/* Project Image & Frame */}
       {project.projectImage && (
-        <div style={{ width: '100%', height: '240px', overflow: 'hidden', backgroundColor: 'var(--color-bg-elevated)', position: 'relative' }}>
+        <div
+          style={{
+            width: '100%',
+            aspectRatio: '16/10',
+            overflow: 'hidden',
+            backgroundColor: 'var(--color-bg-elevated)',
+            position: 'relative',
+          }}
+        >
           <img
             src={project.projectImage}
             alt={name}
             loading="lazy"
             decoding="async"
-            width={400}
-            height={240}
+            width={640}
+            height={400}
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              objectPosition: 'center',
+              objectPosition: 'top center',
               display: 'block',
-              transition: 'transform 0.5s ease',
+              transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease',
+              transform: isHovered ? 'scale(1.04)' : 'scale(1)',
+              filter: isHovered ? 'brightness(1.04)' : 'brightness(0.96)',
             }}
           />
+
+          {/* Subtle gradient vignette at bottom of image */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(17, 19, 26, 0.85) 0%, rgba(17, 19, 26, 0) 40%)',
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* Featured / Category Chip overlaid on image */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '12px',
+              insetInlineStart: '12px',
+              display: 'flex',
+              gap: '6px',
+            }}
+          >
+            {project.isFeatured && (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
+                  backgroundColor: 'rgba(9, 10, 15, 0.75)',
+                  border: '1px solid rgba(0, 210, 255, 0.35)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  color: 'var(--color-accent)',
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                <Sparkles size={11} />
+                <span>{t('status.featured')}</span>
+              </span>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Project Info */}
-      <div style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
-          <div>
+      {/* Project Content */}
+      <div
+        style={{
+          padding: '1.5rem',
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          justifyContent: 'space-between',
+        }}
+      >
+        <div>
+          {/* Header Row: Category & Client */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '0.625rem',
+              flexWrap: 'wrap',
+              gap: '6px',
+            }}
+          >
             {category && (
-              <span className="text-label" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-accent)' }}>
+              <span
+                className="text-label"
+                style={{
+                  color: 'var(--color-accent)',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                }}
+              >
                 {category}
               </span>
             )}
-            <h3
-              style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: '1.25rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-              }}
-            >
-              {name}
-            </h3>
-          </div>
-          <ArrowUpRight size={18} className="rtl-arrow-up-right" style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-        </div>
-
-        {shortDescription && (
-          <p className="text-body-sm" style={{ marginBottom: '1rem', lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {shortDescription}
-          </p>
-        )}
-
-        {project.technologies && project.technologies.length > 0 && (
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {project.technologies.map((tech) => (
+            {clientName && (
               <span
-                key={tech}
+                className="text-mono"
                 style={{
+                  color: 'var(--color-text-dim)',
                   fontSize: '0.6875rem',
-                  fontFamily: 'var(--font-mono)',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  backgroundColor: 'var(--color-bg-elevated)',
-                  color: 'var(--color-text-muted)',
-                  border: '1px solid var(--color-border-subtle)',
                 }}
               >
-                {tech}
+                {clientName}
               </span>
-            ))}
+            )}
           </div>
-        )}
+
+          {/* Title */}
+          <h3
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '1.25rem',
+              fontWeight: 600,
+              color: isHovered ? 'var(--color-accent)' : 'var(--color-text-primary)',
+              transition: 'color 0.25s ease',
+              marginBottom: '0.75rem',
+              lineHeight: 1.3,
+            }}
+          >
+            {name}
+          </h3>
+
+          {/* Short Description */}
+          {shortDescription && (
+            <p
+              className="text-body-sm"
+              style={{
+                marginBottom: '1.25rem',
+                lineHeight: 1.6,
+                color: 'var(--color-text-secondary)',
+                lineClamp: 2,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {shortDescription}
+            </p>
+          )}
+        </div>
+
+        {/* Footer: Technologies & CTA arrow */}
+        <div>
+          {project.technologies && project.technologies.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '6px',
+                flexWrap: 'wrap',
+                marginBottom: '1rem',
+              }}
+            >
+              {project.technologies.slice(0, 4).map((tech) => (
+                <span
+                  key={tech}
+                  style={{
+                    fontSize: '0.6875rem',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    backgroundColor: 'var(--color-bg-elevated)',
+                    color: 'var(--color-text-muted)',
+                    border: '1px solid var(--color-border-subtle)',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {tech}
+                </span>
+              ))}
+              {project.technologies.length > 4 && (
+                <span
+                  style={{
+                    fontSize: '0.6875rem',
+                    fontFamily: 'var(--font-mono)',
+                    padding: '3px 6px',
+                    borderRadius: '4px',
+                    color: 'var(--color-text-dim)',
+                  }}
+                >
+                  +{project.technologies.length - 4}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Card Action Link */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: '0.75rem',
+              borderTop: '1px solid var(--color-border-subtle)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: isHovered ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                transition: 'color 0.2s ease',
+              }}
+            >
+              {hasUrl ? t('portfolio.liveSite') : t('portfolio.ctaButton')}
+            </span>
+
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                backgroundColor: isHovered ? 'var(--color-accent)' : 'var(--color-bg-elevated)',
+                color: isHovered ? 'var(--color-bg-primary)' : 'var(--color-text-muted)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.25s ease',
+                transform: isHovered ? 'translateY(-2px)' : 'none',
+              }}
+            >
+              {hasUrl ? (
+                <ExternalLink size={14} />
+              ) : (
+                <ArrowUpRight size={14} className="rtl-arrow-up-right" />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -117,16 +300,8 @@ function ProjectCard({ project }: { project: Project }) {
         rel="noopener noreferrer"
         aria-label={`${name} - ${category || t('portfolio.liveSite')}`}
         style={cardStyle}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'var(--color-accent)';
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.4)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {content}
       </a>
@@ -146,16 +321,8 @@ function ProjectCard({ project }: { project: Project }) {
       }}
       aria-label={`${name} - ${t('portfolio.ctaButton')}`}
       style={cardStyle}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--color-accent)';
-        e.currentTarget.style.transform = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.4)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {content}
     </div>
@@ -192,12 +359,6 @@ function PortfolioEmptyState() {
           pointerEvents: 'none',
         }}
       />
-
-      {/* Corner brackets */}
-      <div style={{ position: 'absolute', top: '1.5rem', insetInlineStart: '1.5rem', width: '20px', height: '20px', borderTop: '1px solid var(--color-accent)', borderInlineStart: '1px solid var(--color-accent)', opacity: 0.5 }} />
-      <div style={{ position: 'absolute', top: '1.5rem', insetInlineEnd: '1.5rem', width: '20px', height: '20px', borderTop: '1px solid var(--color-accent)', borderInlineEnd: '1px solid var(--color-accent)', opacity: 0.5 }} />
-      <div style={{ position: 'absolute', bottom: '1.5rem', insetInlineStart: '1.5rem', width: '20px', height: '20px', borderBottom: '1px solid var(--color-accent)', borderInlineStart: '1px solid var(--color-accent)', opacity: 0.5 }} />
-      <div style={{ position: 'absolute', bottom: '1.5rem', insetInlineEnd: '1.5rem', width: '20px', height: '20px', borderBottom: '1px solid var(--color-accent)', borderInlineEnd: '1px solid var(--color-accent)', opacity: 0.5 }} />
 
       <div style={{ position: 'relative', zIndex: 2 }}>
         <span className="text-label" style={{ display: 'block', marginBottom: '1.5rem' }}>
@@ -241,16 +402,6 @@ function PortfolioEmptyState() {
             cursor: 'pointer',
             transition: 'all 0.25s ease',
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--color-accent-hover)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 30px rgba(0, 210, 255, 0.25)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--color-accent)';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
         >
           <span>{t('portfolio.ctaButton')}</span>
           <ArrowUpRight size={16} strokeWidth={2.5} className="rtl-arrow-up-right" />
@@ -260,11 +411,12 @@ function PortfolioEmptyState() {
   );
 }
 
+// ─── Portfolio Component ───
 export function Portfolio() {
   const ref = useScrollReveal(0.1);
   const { projects } = useWebsite();
   const { t, decode } = useTranslation();
-  const [selectedCategory, setSelectedCategory] = React.useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const publishedProjects = (projects || []).filter((p) => p.isPublished);
 
@@ -291,38 +443,59 @@ export function Portfolio() {
             {t('portfolio.tag')}
           </span>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <h2 className="text-section-title">{t('portfolio.heading')}</h2>
+            <div>
+              <h2 className="text-section-title">{t('portfolio.heading')}</h2>
+            </div>
 
             {/* Category filter tabs if multiple categories exist */}
             {publishedProjects.length > 0 && categories.length > 2 && (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }} role="tablist" aria-label={t('portfolio.filterLabel')}>
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    role="tab"
-                    aria-selected={selectedCategory === cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    style={{
-                      padding: '6px 14px',
-                      fontSize: '0.8125rem',
-                      fontWeight: selectedCategory === cat ? 600 : 400,
-                      borderRadius: '20px',
-                      border: `1px solid ${selectedCategory === cat ? 'var(--color-accent)' : 'var(--color-border-subtle)'}`,
-                      backgroundColor: selectedCategory === cat ? 'var(--color-accent-muted)' : 'var(--color-bg-elevated)',
-                      color: selectedCategory === cat ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {cat === 'all' ? (t('common.all') || 'All') : cat}
-                  </button>
-                ))}
+              <div
+                style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
+                role="tablist"
+                aria-label={t('portfolio.filterLabel')}
+              >
+                {categories.map((cat) => {
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      role="tab"
+                      aria-selected={isSelected}
+                      onClick={() => setSelectedCategory(cat)}
+                      style={{
+                        padding: '6px 16px',
+                        fontSize: '0.8125rem',
+                        fontWeight: isSelected ? 600 : 500,
+                        borderRadius: '9999px',
+                        border: `1px solid ${isSelected ? 'var(--color-accent)' : 'var(--color-border-subtle)'}`,
+                        backgroundColor: isSelected ? 'rgba(0, 210, 255, 0.12)' : 'var(--color-bg-elevated)',
+                        color: isSelected ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'var(--color-border-strong)';
+                          e.currentTarget.style.color = 'var(--color-text-primary)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
+                          e.currentTarget.style.color = 'var(--color-text-secondary)';
+                        }
+                      }}
+                    >
+                      {cat === 'all' ? (t('common.all') || 'All') : cat}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content Grid */}
         <div className="reveal reveal-delay-2">
           {publishedProjects.length === 0 ? (
             <PortfolioEmptyState />
@@ -332,10 +505,13 @@ export function Portfolio() {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))',
                 gap: '2rem',
+                alignItems: 'stretch',
               }}
             >
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
+              {filteredProjects.map((project, idx) => (
+                <div key={project.id} className={`reveal reveal-delay-${(idx % 4) + 1}`}>
+                  <ProjectCard project={project} />
+                </div>
               ))}
             </div>
           )}

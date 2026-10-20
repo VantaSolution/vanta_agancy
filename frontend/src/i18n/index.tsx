@@ -37,13 +37,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   // Apply dir and lang to html document root whenever language changes, and synchronize SEO meta
   useEffect(() => {
+    const htmlLang = language === 'ar' ? 'ar-EG' : 'en';
     document.documentElement.setAttribute('dir', dir);
-    document.documentElement.setAttribute('lang', language);
+    document.documentElement.setAttribute('lang', htmlLang);
 
     // Synchronize localized document title and SEO metadata
-    const defaultTitle = language === 'ar' ? 'ڤانتا — استوديو رقمي' : 'VANTA — Digital Studio';
+    const defaultTitle = language === 'ar' ? 'ڤانتا — استوديو رقمي | هندسة وتطوير المواقع والأنظمة' : 'VANTA — Digital Studio';
     const defaultDesc = language === 'ar'
-      ? 'استوديو رقمي متخصص في هندسة وتطوير مواقع وتطبيقات عصرية فائقة السرعة للشركات الطموحة.'
+      ? 'استوديو رقمي متخصص في تصميم وهندسة مواقع وتطبيقات ويب سريعة وحديثة، معمولة مخصوص للشركات اللي عاوزة تتميز وتكبّر شغلها.'
       : 'Premium digital studio specializing in website development, custom web applications, and digital experiences that move businesses forward.';
 
     document.title = defaultTitle;
@@ -56,6 +57,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
     const ogDesc = document.querySelector('meta[property="og:description"]');
     if (ogDesc) ogDesc.setAttribute('content', defaultDesc);
+
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twTitle) twTitle.setAttribute('content', defaultTitle);
+
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (twDesc) twDesc.setAttribute('content', defaultDesc);
 
     try {
       localStorage.setItem(STORAGE_KEY, language);

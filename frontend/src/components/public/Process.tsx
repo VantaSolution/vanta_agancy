@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useTranslation } from '@/i18n';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Search, Compass, Code2, Rocket, LucideIcon } from 'lucide-react';
+
+const processIcons: LucideIcon[] = [Search, Compass, Code2, Rocket];
 
 export function Process() {
   const ref = useScrollReveal(0.1);
-  const { t, dict } = useTranslation();
+  const { t, dict, isRtl } = useTranslation();
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
   const processSteps = dict.process.steps;
 
@@ -16,26 +19,47 @@ export function Process() {
 
   return (
     <section id="process" className="section-padding" style={{ position: 'relative', overflow: 'hidden' }}>
-      <div className="container-wide" ref={ref}>
+      {/* Background ambient lighting */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '30%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '700px',
+          height: '400px',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(0, 210, 255, 0.04) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div className="container-wide" ref={ref} style={{ position: 'relative', zIndex: 2 }}>
         {/* Header */}
         <div className="reveal" style={{ textAlign: 'center', marginBottom: '5rem' }}>
           <span className="text-label-accent" style={{ display: 'block', marginBottom: '1rem' }}>
             {t('process.tag')}
           </span>
           <h2 className="text-section-title">{t('process.heading')}</h2>
+          <p className="text-body" style={{ maxWidth: '580px', margin: '1rem auto 0', color: 'var(--color-text-secondary)' }}>
+            {isRtl
+              ? 'منهجية عمل واضحة ومدروسة، بتضمن لك وضوح تام في كل خطوة، وسرعة في التنفيذ، وجودة تليق بتطلعاتك.'
+              : 'A disciplined engineering methodology delivering total transparency, rapid velocity, and uncompromising code quality.'}
+          </p>
         </div>
 
-        {/* Desktop: Horizontal Timeline */}
-        <div className="process-desktop reveal reveal-delay-2">
-          {/* Connection line */}
+        {/* Desktop: Step Cards with Connected Progress Rail */}
+        <div className="process-desktop reveal reveal-delay-2" style={{ position: 'relative' }}>
+          {/* Glowing connecting track line behind node circles */}
           <div
             style={{
               position: 'absolute',
-              top: '24px',
-              insetInlineStart: '12.5%',
-              insetInlineEnd: '12.5%',
-              height: '1px',
-              backgroundColor: 'var(--color-border-default)',
+              top: '44px',
+              insetInlineStart: '10%',
+              insetInlineEnd: '10%',
+              height: '2px',
+              background: 'linear-gradient(90deg, rgba(0, 210, 255, 0.2) 0%, rgba(0, 210, 255, 0.6) 50%, rgba(0, 210, 255, 0.2) 100%)',
+              zIndex: 1,
             }}
           />
 
@@ -43,138 +67,185 @@ export function Process() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '2rem',
+              gap: '1.5rem',
               position: 'relative',
+              zIndex: 2,
             }}
           >
-            {processSteps.map((step, index) => (
-              <div
-                key={step.number}
-                className={`reveal reveal-delay-${index + 2}`}
-                style={{
-                  textAlign: 'center',
-                  position: 'relative',
-                }}
-              >
-                {/* Node dot */}
+            {processSteps.map((step, index) => {
+              const Icon = processIcons[index % processIcons.length];
+              const isHovered = hoveredStep === index;
+
+              return (
                 <div
+                  key={step.number}
+                  className={`reveal reveal-delay-${index + 2}`}
+                  onMouseEnter={() => setHoveredStep(index)}
+                  onMouseLeave={() => setHoveredStep(null)}
                   style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '50%',
-                    border: '2px solid var(--color-accent)',
-                    backgroundColor: 'var(--color-bg-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 1.5rem',
+                    backgroundColor: isHovered ? 'var(--color-bg-elevated)' : 'var(--color-bg-surface)',
+                    border: `1px solid ${isHovered ? 'rgba(0, 210, 255, 0.4)' : 'var(--color-border-subtle)'}`,
+                    borderRadius: '14px',
+                    padding: '2rem 1.25rem',
+                    textAlign: 'center',
                     position: 'relative',
-                    zIndex: 2,
+                    transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transform: isHovered ? 'translateY(-6px)' : 'none',
+                    boxShadow: isHovered
+                      ? '0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 210, 255, 0.12)'
+                      : '0 4px 16px rgba(0, 0, 0, 0.2)',
                   }}
                 >
+                  {/* Step Node Circle with Icon */}
+                  <div
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: '50%',
+                      border: `2px solid ${isHovered ? 'var(--color-accent)' : 'rgba(0, 210, 255, 0.35)'}`,
+                      backgroundColor: 'var(--color-bg-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 1.5rem',
+                      position: 'relative',
+                      boxShadow: isHovered ? '0 0 18px rgba(0, 210, 255, 0.4)' : 'none',
+                      transition: 'all 0.3s ease',
+                      color: isHovered ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                    }}
+                  >
+                    <Icon size={22} />
+                  </div>
+
+                  {/* Step Number Tag */}
                   <span
                     className="text-mono"
                     style={{
+                      display: 'inline-block',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
                       color: 'var(--color-accent)',
+                      marginBottom: '0.625rem',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      backgroundColor: 'rgba(0, 210, 255, 0.08)',
+                    }}
+                  >
+                    STEP {step.number}
+                  </span>
+
+                  {/* Step Title */}
+                  <h3
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: '1.0625rem',
                       fontWeight: 600,
+                      color: isHovered ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                      marginBottom: '0.75rem',
+                      lineHeight: 1.3,
+                      transition: 'color 0.2s ease',
+                    }}
+                  >
+                    {step.title}
+                  </h3>
+
+                  {/* Step Description */}
+                  <p
+                    className="text-body-sm"
+                    style={{
+                      lineHeight: 1.7,
+                      color: 'var(--color-text-muted)',
                       fontSize: '0.8125rem',
                     }}
                   >
-                    {step.number}
-                  </span>
+                    {step.description}
+                  </p>
                 </div>
-
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-heading)',
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.04em',
-                    color: 'var(--color-text-primary)',
-                    marginBottom: '0.75rem',
-                  }}
-                >
-                  {step.title}
-                </h3>
-
-                <p
-                  className="text-body-sm"
-                  style={{
-                    maxWidth: '240px',
-                    margin: '0 auto',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {step.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Mobile: Vertical Timeline */}
+        {/* Mobile: Vertical Connected Timeline */}
         <div className="process-mobile reveal reveal-delay-2">
-          <div style={{ position: 'relative', paddingInlineStart: '3rem' }}>
-            {/* Vertical line */}
+          <div style={{ position: 'relative', paddingInlineStart: '3.25rem' }}>
+            {/* Vertical Rail */}
             <div
               style={{
                 position: 'absolute',
-                insetInlineStart: '15px',
+                insetInlineStart: '18px',
                 top: '24px',
                 bottom: '24px',
-                width: '1px',
-                backgroundColor: 'var(--color-border-default)',
+                width: '2px',
+                background: 'linear-gradient(180deg, rgba(0, 210, 255, 0.6) 0%, rgba(0, 210, 255, 0.2) 100%)',
               }}
             />
 
-            {processSteps.map((step, index) => (
-              <div
-                key={step.number}
-                style={{
-                  marginBottom: index < processSteps.length - 1 ? '3rem' : '0',
-                  position: 'relative',
-                }}
-              >
-                {/* Node dot */}
+            {processSteps.map((step, index) => {
+              const Icon = processIcons[index % processIcons.length];
+              return (
                 <div
+                  key={step.number}
                   style={{
-                    position: 'absolute',
-                    insetInlineStart: '-3rem',
-                    top: '0',
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    border: '2px solid var(--color-accent)',
-                    backgroundColor: 'var(--color-bg-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 2,
+                    marginBottom: index < processSteps.length - 1 ? '2.5rem' : '0',
+                    position: 'relative',
+                    padding: '1.25rem',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--color-bg-surface)',
+                    border: '1px solid var(--color-border-subtle)',
                   }}
                 >
-                  <span className="text-mono" style={{ color: 'var(--color-accent)', fontSize: '0.6875rem', fontWeight: 600 }}>
-                    {step.number}
+                  {/* Floating Icon Node */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      insetInlineStart: '-3.25rem',
+                      top: '1.25rem',
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: '50%',
+                      border: '2px solid var(--color-accent)',
+                      backgroundColor: 'var(--color-bg-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--color-accent)',
+                      zIndex: 2,
+                    }}
+                  >
+                    <Icon size={16} />
+                  </div>
+
+                  <span
+                    className="text-mono"
+                    style={{
+                      fontSize: '0.6875rem',
+                      color: 'var(--color-accent)',
+                      display: 'block',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    STEP {step.number}
                   </span>
+
+                  <h3
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      color: 'var(--color-text-primary)',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    {step.title}
+                  </h3>
+
+                  <p className="text-body-sm" style={{ lineHeight: 1.65, color: 'var(--color-text-secondary)' }}>
+                    {step.description}
+                  </p>
                 </div>
-
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-heading)',
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.04em',
-                    color: 'var(--color-text-primary)',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  {step.title}
-                </h3>
-
-                <p className="text-body-sm" style={{ lineHeight: 1.7 }}>
-                  {step.description}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -200,8 +271,8 @@ export function Process() {
               top: '-100px',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '420px',
-              height: '320px',
+              width: '450px',
+              height: '350px',
               borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(0, 210, 255, 0.12) 0%, transparent 70%)',
               pointerEvents: 'none',
@@ -279,7 +350,7 @@ export function Process() {
         .process-desktop { display: block; position: relative; }
         .process-mobile { display: none; }
         
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
           .process-desktop { display: none !important; }
           .process-mobile { display: block !important; }
         }

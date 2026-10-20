@@ -14,6 +14,10 @@ export const errorHandler = (err: AppError, req: Request, res: Response, _next: 
   logger.error(`[${req.method}] ${req.url} - ${statusCode} - ${message}`);
   res.status(statusCode).json({
     success: false,
-    error: { code, message, details: err.message, stack: err.stack },
+    error: {
+      code,
+      message: env.NODE_ENV === 'production' && statusCode === 500 ? 'An unexpected server error occurred. Please try again later.' : message,
+      ...(env.NODE_ENV === 'development' ? { details: err.message, stack: err.stack } : {}),
+    },
   });
 };
