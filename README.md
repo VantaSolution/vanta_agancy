@@ -1,6 +1,6 @@
 # VANTA — Digital Studio (V2.0)
 
-A high-performance agency website with a reactive private admin control panel, built using modern web standards, Express REST API, Prisma ORM, and Supabase PostgreSQL.
+A high-performance digital agency platform engineered with React 19, Vite, Tailwind CSS v4, Express REST API, Prisma ORM, and Supabase PostgreSQL.
 
 ---
 
@@ -9,131 +9,109 @@ A high-performance agency website with a reactive private admin control panel, b
 | Layer | Technology |
 |---|---|
 | **Frontend** | React 19, TypeScript, Tailwind CSS v4, Vite |
-| **Backend** | Node.js, Express, TypeScript, Prisma ORM |
-| **Database** | Supabase PostgreSQL |
-| **Authentication** | JWT (Access & Refresh Tokens) with Bcrypt password hashing |
-| **Security** | Helmet HTTP Headers, Express Rate Limiting, CORS |
+| **Backend API** | Node.js, Express, TypeScript, Vercel Serverless Function |
+| **Database** | PostgreSQL (Supabase / Managed Postgres) via `pg.Pool` & Prisma ORM |
+| **Storage** | Supabase Storage (`vanta-media` bucket) via `@supabase/supabase-js` |
+| **Authentication**| JWT (Access & Refresh Tokens) with Bcrypt password hashing |
+| **Security** | Helmet HTTP Headers, Express Rate Limiting, CORS, Input Sanitization |
+| **Design & Typography** | Modern dark theme with Cairo Google Font & Egyptian Arabic localization |
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-vanta-agency/
-├── frontend/             # Vercel Project 1 (Root Directory: frontend)
-│   ├── package.json
-│   ├── vercel.json       # SPA client route rewrites
+vanta_agancy/
+├── frontend/                     # Project 1: Vite + React 19 SPA
+│   ├── public/                   # Static assets, robots.txt, sitemap.xml
 │   ├── src/
-│   └── ...
-├── backend/              # Vercel Project 2 (Root Directory: backend)
+│   │   ├── api/                  # Axios HTTP client & API endpoints
+│   │   ├── components/           # Public section components (Hero, Services, Portfolio...)
+│   │   ├── context/              # AuthContext & WebsiteContext (Reactive CMS Binding)
+│   │   ├── data/                 # Default Egyptian Arabic fallback content
+│   │   ├── pages/                # Public HomePage, LoginPage, & 7 Admin Pages
+│   │   └── styles/               # CSS Design System
 │   ├── package.json
-│   ├── vercel.json       # Serverless function entrypoint route
-│   ├── api/index.ts      # Vercel serverless function entrypoint
-│   ├── prisma/           # Schema & migrations
+│   ├── package-lock.json
+│   ├── vercel.json               # Security headers & SPA client routing rewrites
+│   └── vite.config.ts
+├── backend/                      # Project 2: Express + TypeScript REST API
+│   ├── api/                      # Vercel serverless function entrypoint (index.ts)
+│   ├── prisma/                   # Prisma ORM schema & configuration
+│   ├── scripts/                  # Pre-launch QA automated suite & Admin tools
 │   ├── src/
-│   └── ...
-├── .gitignore
-├── DEPLOYMENT.md
-├── SECURITY.md
-└── README.md
+│   │   ├── config/               # Zod env parser & PostgreSQL connection pool
+│   │   ├── db/                   # SQL migrations & database seed scripts
+│   │   ├── middlewares/          # JWT auth, rate limiters, error handling
+│   │   ├── routes/               # Modular REST routes (auth, content, projects...)
+│   │   ├── utils/                # Password hashing, JWT utils, Winston logger
+│   │   ├── app.ts                # Express application configuration
+│   │   └── server.ts             # Standalone HTTP server for local development
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── vercel.json               # Serverless function routing rules
+│   └── tsconfig.json
+├── docs/                         # Project Documentation
+│   ├── ARCHITECTURE.md           # System topology, data flow, resilience models
+│   ├── DEVELOPMENT.md            # Local development, environment setup, testing
+│   ├── DEPLOYMENT.md             # Vercel two-project deployment & environment matrix
+│   └── PRODUCTION_CHECKLIST.md   # Pre-launch sign-off matrix & launch criteria
+├── .env.example                  # Environment template with harmless placeholders
+├── .gitignore                    # Git tracking rules (excludes secrets & build outputs)
+├── SECURITY.md                   # Security guidelines & vulnerability policies
+└── README.md                     # Project overview and index
 ```
 
 ---
 
-## ⚡ Local Development Setup
+## ⚡ Quick Start
 
-### 1. Environment Configuration
-Copy environment templates to `.env`:
-
+### 1. Environment Setup
 ```bash
 # Backend setup
-cp backend/.env.example backend/.env
+copy backend\.env.example backend\.env
 
 # Frontend setup
-cp frontend/.env.example frontend/.env
+copy frontend\.env.example frontend\.env
 ```
 
 ### 2. Backend Initialization
 ```bash
 cd backend
 npm install
-npx prisma generate  # Generate Prisma Client
-npm run migrate      # Run database schema migrations
-npm run seed         # Create initial admin user & default CMS data
-npm run dev          # Starts server on http://localhost:5000
+npx prisma generate
+npm run dev
+# Server listens at http://localhost:5000
 ```
 
 ### 3. Frontend Initialization
 ```bash
 cd frontend
 npm install
-npm run dev          # Starts Vite dev server on http://localhost:3000
+npm run dev
+# Client runs at http://localhost:3000
 ```
 
 ---
 
-## 🚀 Two-Vercel-Project Deployment Workflow
+## 🧪 Automated Testing
 
-This single GitHub repository (`VantaSolution/vanta_agancy`) is deployed to Vercel as **two independent Vercel projects**.
-
----
-
-### Project 1: VANTA Backend API
-
-1. Go to [Vercel Dashboard → New Project](https://vercel.com/new).
-2. Select repository: `VantaSolution/vanta_agancy`.
-3. Configure Project Settings:
-   - **Project Name**: `vanta-backend`
-   - **Framework Preset**: `Other`
-   - **Root Directory**: `backend` *(Click Edit and select `backend`)*
-   - **Build Command**: `prisma generate && tsc`
-4. Add **Environment Variables**:
-   ```env
-   NODE_ENV=production
-   PORT=5000
-   DATABASE_URL=postgresql://postgres.your-ref:[YOUR-PASSWORD]@aws-0-region.pooler.supabase.com:6543/postgres?pgbouncer=true
-   DIRECT_URL=postgresql://postgres.your-ref:[YOUR-PASSWORD]@aws-0-region.pooler.supabase.com:5432/postgres
-   JWT_SECRET=your_long_random_jwt_access_secret_min_16_chars
-   JWT_REFRESH_SECRET=your_long_random_jwt_refresh_secret_min_16_chars
-   CORS_ORIGIN=https://vanta-frontend.vercel.app
-   ADMIN_EMAIL=admin@vanta.studio
-   ADMIN_PASSWORD=your_strong_admin_password
-   ```
-5. Click **Deploy**.
-6. Copy your deployed backend URL (e.g. `https://vanta-backend.vercel.app`).
-
----
-
-### Project 2: VANTA Frontend Application
-
-1. Go to [Vercel Dashboard → New Project](https://vercel.com/new).
-2. Select repository: `VantaSolution/vanta_agancy`.
-3. Configure Project Settings:
-   - **Project Name**: `vanta-frontend`
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: `frontend` *(Click Edit and select `frontend`)*
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-4. Add **Environment Variables**:
-   ```env
-   VITE_API_URL=https://vanta-backend.vercel.app/api
-   VITE_USE_MOCK=false
-   ```
-5. Click **Deploy**.
-
----
-
-## 🧪 Live API Verification
-
-Verify your live backend deployment with Node.js:
+Run the full pre-launch integration test suite:
 
 ```bash
-node -e "fetch('https://vanta-backend.vercel.app/api/content').then(async r => console.log('Live Vercel API Status:', r.status, await r.json()))"
+cd backend
+npm run test:qa
 ```
+*Executes 15 integration tests verifying health checks, CMS queries, rate limiters, input validation, authentication guards, and stack trace suppression.*
 
 ---
 
-## 📖 Additional Guides
+## 📖 Documentation Index
 
-- [DEPLOYMENT.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/DEPLOYMENT.md) — Production architecture & verification checklist.
-- [SECURITY.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/SECURITY.md) — Security policies & go-live security checklist.
+For in-depth operational and architectural details, refer to the documents in `docs/`:
+
+- [docs/ARCHITECTURE.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/docs/ARCHITECTURE.md) — Comprehensive architectural blueprint, middleware pipeline, and data flow.
+- [docs/DEVELOPMENT.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/docs/DEVELOPMENT.md) — Local development workflow, common issues, and test automation.
+- [docs/DEPLOYMENT.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/docs/DEPLOYMENT.md) — Step-by-step Vercel deployment, environment variable matrix, and rollback strategy.
+- [docs/PRODUCTION_CHECKLIST.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/docs/PRODUCTION_CHECKLIST.md) — Pre-launch verification matrix and production sign-off criteria.
+- [SECURITY.md](file:///c:/Users/mostafa/Desktop/Agancy%20V%202.0/SECURITY.md) — Vulnerability reporting policy and security hardening measures.
